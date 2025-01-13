@@ -1,24 +1,46 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const HomePage = () => {
-  const classes = [
-    { id: 6, name: "Class 6" },
-    { id: 7, name: "Class 7" },
-    { id: 8, name: "Class 8" },
-    { id: 9, name: "Class 9" },
-    { id: 10, name: "Class 10" }
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  ];
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/classes');
+        if (!response.ok) {
+          throw new Error(`Failed to load classes: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setClasses(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClasses();
+  }, []);
+
+  if (loading) {
+    return <div>Loading classes...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <div>
       <h1>Welcome to Unite Classes</h1>
       <div className="card-container">
         {classes.map((cls) => (
-          <Link key={cls.id} to={`/class/${cls.id}`} className="card">
-            <h2>{cls.name}</h2>
-          </Link>
+        <Link key={cls._id} to={`/class/${cls._id}`} className="card"> 
+        <h2>{cls.className}</h2> 
+      </Link>
         ))}
       </div>
     </div>

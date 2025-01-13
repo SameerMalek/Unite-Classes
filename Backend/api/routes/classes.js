@@ -1,20 +1,10 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
+const { getClasses, getSubjects, getContent } = require('../controllers/classesController');
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+const router = express.Router();
 
-// MongoDB connection
-mongoose.connect('mongodb://localhost:27017/tuition', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+router.get('/', getClasses); // Fetch all classes
+router.get('/:classId/subjects', getSubjects); // Fetch subjects for a class
+router.get('/:classId/subjects/:subjectName/categories/:categoryType', getContent); // Fetch files for a category
 
-// Routes
-const classRoutes = require('./routes/classes');
-app.use('/api/classes', classRoutes);
-
-const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+module.exports = router;

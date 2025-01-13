@@ -1,45 +1,49 @@
-const Class = require('../models/Class');
-const Course = require('../models/Course');
-const Content = require('../models/Content');
+import { find, findById, findOne } from '../models/Class';
 
-exports.getClasses = async (req, res) => {
+export async function getClasses(req, res) {
   try {
-    const classes = await Class.find();
+    const classes = await find({}, 'className'); // Fetch only className and _id
     res.json(classes);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Error fetching classes', details: err.message });
   }
-};
+}
 
-exports.getCourses = async (req, res) => {
+export async function getSubjects(req, res) {
   try {
     const { classId } = req.params;
-    const courses = await Course.find({ classId });
-    res.json(courses);
+    const classData = await findById(classId, 'subjects');
+    if (!classData) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+    res.json(classData.subjects);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Error fetching subjects', details: err.message });
   }
-};
+}
 
-exports.getContent = async (req, res) => {
+export async function getContent(req, res) {
   try {
-    const { courseId } = req.params;
-    const content = await Content.find({ courseId });
-    res.json(content);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+    const { classId, subjectName, categoryType } = req.params;
 
-exports.uploadContent = async (req, res) => {
-  try {
-    const { courseId } = req.params;
-    const { chapter, type, data } = req.body;
+    const classData = await findOne(
+      { _id: classId, 'subjects.name': subjectName },
+      { 'subjects.$': 1 } // Fetch only the matching subject
+    );
 
-    const newContent = new Content({ courseId, chapter, type, data });
-    await newContent.save();
-    res.status(201).json(newContent);
+    if (!classData || classData.subjects.length === 0) {
+      return res.status(404).json({ error: 'Subject not found' });
+    }
+
+    const subject = classData.subjects[0];
+    const category = subject.categories.find((cat) => cat.type === categoryType);
+
+    if (!category) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    res.json(category.files);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Error fetching content', details: err.message });
   }
-};
+}

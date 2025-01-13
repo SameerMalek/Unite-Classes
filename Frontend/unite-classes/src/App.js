@@ -1,24 +1,24 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; 
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './Pages/homePage/HomePage.jsx';
 import ClassDetailPage from './Pages/classDetailPage/ClassDetailPage';
-import CourseDetailPage from './Pages/courseDetailPage/CourseDetailPage';
-import UploadContentPage from './Pages/uploadContentPage/UploadContentPage';
+// import CourseDetailPage from './Pages/courseDetailPage/CourseDetailPage';
 import Header from './Components/header/header';
 import Footer from './Components/footer/Footer';
-
-function App() {
+import SubjectCategoryPage from './Pages/categoryDetailPage/CategoryDetailPage.jsx' // Import your new category page component
+import CategoryContentPage from './Pages/CategoryContentPage/CategoryContentPage.jsx'
+function App () {
   return (
     <Router>
-      <div className="container">
-        <Header/>
+      <div className='container'>
+        <Header />
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/class/:classId" element={<ClassDetailPage />} />
-          <Route path="/course/:courseId" element={<CourseDetailPage />} />
-          <Route path="/upload/:courseId" element={<UploadContentPage />} />
+          <Route path='/' element={<HomePage />} />
+          <Route path='/class/:classId' element={<ClassDetailPage />} />
+          <Route path="/classes/:classId/subjects/:subjectName/categories" element={<SubjectCategoryPage />} />  {/* Corrected the component name */}
+          <Route path="/classes/:classId/subjects/:subjectName/categories/:categoryType" element={<CategoryContentPage />} />
         </Routes>
-        <Footer/>
+        <Footer />
       </div>
     </Router>
   );
