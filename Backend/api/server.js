@@ -2,8 +2,17 @@ import express, { json } from "express";
 import { connect, Schema, model } from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import jwt from 'jsonwebtoken';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 dotenv.config();
+
+// Fix for ES Modules to get the directory name
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 if (!process.env.MONGODB_URI) {
   console.error("MONGODB_URI is not defined in the environment variables.");
@@ -51,7 +60,6 @@ const classSchema = new Schema({
 const Class = model("Class", classSchema);
 
 // API Endpoints
-
 // Get all classes
 app.get("/api/classes", async (req, res) => {
   try {
@@ -156,6 +164,119 @@ app.get("/api/classes/:classId/subjects/:subjectName/categories/:categoryType", 
     console.error("Error fetching files for category:", error.message);
     res.status(500).json({ message: "Failed to fetch files for category", error: error.message });
   }
+});
+
+// Admin authentication middleware
+const authenticateAdmin = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.admin = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid token' });
+  }
+};
+
+// Admin login
+app.post('/api/admin/login', async (req, res) => {
+  const { username, password } = req.body;
+  
+  // Replace these with your actual admin credentials
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'sakil';
+
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    res.json({ token });
+  } else {
+    res.status(401).json({ message: 'Invalid credentials' });
+  }
+});
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, 'uploads/'));  // Ensure correct path
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// Upload file
+app.post('/api/admin/upload', authenticateAdmin, upload.single('file'), async (req, res) => {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    // Generate file URL
+    const fileUrl = `${process.env.BASE_URL}/uploads/${file.filename}`;
+
+    // Respond with the file URL
+    res.json({
+      message: 'File uploaded successfully',
+      fileUrl: fileUrl
+    });
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    res.status(500).json({ message: 'Error uploading file', error: error.message });
+  }
+});
+
+// Get all files
+app.get('/api/admin/files', authenticateAdmin, async (req, res) => {
+  try {
+    const classes = await Class.find();
+    const files = [];
+
+    classes.forEach(classDoc => {
+      classDoc.subjects.forEach(subject => {
+        subject.categories.forEach(category => {
+          category.files.forEach(file => {
+            files.push({
+              id: file._id,
+              fileName: file.fileName,
+              fileUrl: file.fileUrl,
+              className: classDoc.className,
+              subject: subject.name,
+              category: category.type,
+              uploadedAt: file.uploadedAt
+            });
+          });
+        });
+      });
+    });
+
+    res.json(files);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching files', error: error.message });
+  }
+});
+
+// Static file serving for uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Error handling for missing static files
+app.use((req, res, next) => {
+  const error = new Error('Not Found');
+  error.status = 404;
+  next(error);
+});
+
+// Handle errors globally
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({ message: err.message });
 });
 
 // Start the server

@@ -7,6 +7,7 @@ import Header from './Components/header/header';
 import Footer from './Components/footer/Footer';
 import SubjectCategoryPage from './Pages/categoryDetailPage/CategoryDetailPage.jsx' // Import your new category page component
 import CategoryContentPage from './Pages/CategoryContentPage/CategoryContentPage.jsx'
+import AdminDashboard from './Components/AdminDashboard.jsx';
 function App () {
   return (
     <Router>
@@ -15,6 +16,8 @@ function App () {
         <Routes>
           <Route path='/' element={<HomePage />} />
           <Route path='/class/:classId' element={<ClassDetailPage />} />
+          {/* Admin routes */}
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/classes/:classId/subjects/:subjectName/categories" element={<SubjectCategoryPage />} />  {/* Corrected the component name */}
           <Route path="/classes/:classId/subjects/:subjectName/categories/:categoryType" element={<CategoryContentPage />} />
         </Routes>
