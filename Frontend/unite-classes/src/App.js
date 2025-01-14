@@ -2,9 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './Pages/homePage/HomePage.jsx';
 import ClassDetailPage from './Pages/classDetailPage/ClassDetailPage';
-// import CourseDetailPage from './Pages/courseDetailPage/CourseDetailPage';
-import Header from './Components/header/header';
 import Footer from './Components/footer/Footer';
+import Navbar from './Components/Navbar.js'
 import SubjectCategoryPage from './Pages/categoryDetailPage/CategoryDetailPage.jsx' // Import your new category page component
 import CategoryContentPage from './Pages/CategoryContentPage/CategoryContentPage.jsx'
 import AdminDashboard from './Components/AdminDashboard.jsx';
@@ -12,7 +11,7 @@ function App () {
   return (
     <Router>
       <div className='container'>
-        <Header />
+        <Navbar/>
         <Routes>
           <Route path='/' element={<HomePage />} />
           <Route path='/class/:classId' element={<ClassDetailPage />} />

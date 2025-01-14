@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import "./CategoryDetailPage.css";
+import "../homePage/Pages.css";
 
 const CategoryDetailPage = () => {
   const { classId, subjectName } = useParams();
@@ -49,21 +49,20 @@ const CategoryDetailPage = () => {
           <p>No categories found for this subject.</p>
         ) : (
           categories.map((category) => (
-            <div key={category._id} className="card">
-              <h2>
-                {/* Link to CategoryContentPage with category ID */}
-                <Link to={`/classes/${classId}/subjects/${subjectName}/categories/${category.type}`}>
-  {category.type}
-</Link>
-
-
-              </h2>
-            </div>
+           
+              <Link className="card" key={category._id}
+                to={`/classes/${classId}/subjects/${subjectName}/categories/${category.type}`}
+                style={{
+                
+                  backgroundImage: `url(${category.backgroundImage || "https://via.placeholder.com/300"})`,
+                }}
+              >
+                
+              </Link>
+            
           ))
         )}
       </div>
-      {/* Corrected back link to match routes */}
-      <Link to={`/classes/${classId}/subjects/${subjectName}`}>Back to Subject</Link>
     </div>
   );
 };

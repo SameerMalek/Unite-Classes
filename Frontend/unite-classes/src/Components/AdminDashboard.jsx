@@ -1,6 +1,5 @@
-// src/components/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+// import { Navigate } from 'react-router-dom';
 import "./Admin.css";
 
 const AdminDashboard = () => {
@@ -14,6 +13,13 @@ const AdminDashboard = () => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [editMode, setEditMode] = useState(null);
+  const [editData, setEditData] = useState({});
+
+  // Predefined options for dropdowns
+  const classOptions = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
+  const subjectOptions = ['Mathematics', 'Science', 'Social Science', 'English'];
+  const categoryOptions = ['Notes', 'Test Papers', 'Solutions', 'Study Material'];
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -74,9 +80,9 @@ const AdminDashboard = () => {
   
     const formData = new FormData();
     formData.append('file', uploadData.file);
-    formData.append('className', uploadData.className.trim());
-    formData.append('subject', uploadData.subject.trim());
-    formData.append('category', uploadData.category.trim());
+    formData.append('className', uploadData.className);
+    formData.append('subject', uploadData.subject);
+    formData.append('category', uploadData.category);
   
     try {
       const response = await fetch('http://localhost:5000/api/admin/upload', {
@@ -97,6 +103,8 @@ const AdminDashboard = () => {
           subject: '',
           category: ''
         });
+        // Reset file input
+        document.querySelector('input[type="file"]').value = '';
       } else {
         if (response.status === 401) {
           setError('Unauthorized access. Please log in again.');
@@ -108,6 +116,38 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       setError('Upload failed. Please try again.');
+    }
+  };
+
+  const handleEdit = (file) => {
+    setEditMode(file.id);
+    setEditData({
+      className: file.className,
+      subject: file.subject,
+      category: file.category
+    });
+  };
+
+  const handleUpdate = async (fileId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/admin/files/${fileId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        body: JSON.stringify(editData)
+      });
+
+      if (response.ok) {
+        setSuccess('File updated successfully');
+        fetchFiles();
+        setEditMode(null);
+      } else {
+        setError('Update failed');
+      }
+    } catch (error) {
+      setError('Update failed');
     }
   };
   
@@ -177,34 +217,43 @@ const AdminDashboard = () => {
           <h2 className="text-2xl font-bold mb-6">Upload File</h2>
           <form onSubmit={handleUpload} className="space-y-4">
             <div>
-              <input
-                type="text"
-                placeholder="Class Name (e.g., Class 6)"
+              <select
                 className="w-full p-2 border rounded"
                 value={uploadData.className}
                 onChange={(e) => setUploadData({...uploadData, className: e.target.value})}
                 required
-              />
+              >
+                <option value="">Select Class</option>
+                {classOptions.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
             </div>
             <div>
-              <input
-                type="text"
-                placeholder="Subject (e.g., Mathematics)"
+              <select
                 className="w-full p-2 border rounded"
                 value={uploadData.subject}
                 onChange={(e) => setUploadData({...uploadData, subject: e.target.value})}
                 required
-              />
+              >
+                <option value="">Select Subject</option>
+                {subjectOptions.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
             </div>
             <div>
-              <input
-                type="text"
-                placeholder="Category (e.g., Notes)"
+              <select
                 className="w-full p-2 border rounded"
                 value={uploadData.category}
                 onChange={(e) => setUploadData({...uploadData, category: e.target.value})}
                 required
-              />
+              >
+                <option value="">Select Category</option>
+                {categoryOptions.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
             </div>
             <div>
               <input
@@ -243,9 +292,51 @@ const AdminDashboard = () => {
                 {files.map((file) => (
                   <tr key={file.id}>
                     <td className="px-6 py-4 border-b">{file.fileName}</td>
-                    <td className="px-6 py-4 border-b">{file.className}</td>
-                    <td className="px-6 py-4 border-b">{file.subject}</td>
-                    <td className="px-6 py-4 border-b">{file.category}</td>
+                    <td className="px-6 py-4 border-b">
+                      {editMode === file.id ? (
+                        <select
+                          className="w-full p-1 border rounded"
+                          value={editData.className}
+                          onChange={(e) => setEditData({...editData, className: e.target.value})}
+                        >
+                          {classOptions.map(option => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        file.className
+                      )}
+                    </td>
+                    <td className="px-6 py-4 border-b">
+                      {editMode === file.id ? (
+                        <select
+                          className="w-full p-1 border rounded"
+                          value={editData.subject}
+                          onChange={(e) => setEditData({...editData, subject: e.target.value})}
+                        >
+                          {subjectOptions.map(option => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        file.subject
+                      )}
+                    </td>
+                    <td className="px-6 py-4 border-b">
+                      {editMode === file.id ? (
+                        <select
+                          className="w-full p-1 border rounded"
+                          value={editData.category}
+                          onChange={(e) => setEditData({...editData, category: e.target.value})}
+                        >
+                          {categoryOptions.map(option => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        file.category
+                      )}
+                    </td>
                     <td className="px-6 py-4 border-b">
                       <input
                         type="text"
@@ -254,13 +345,38 @@ const AdminDashboard = () => {
                         className="w-full p-1 border rounded"
                       />
                     </td>
-                    <td className="px-6 py-4 border-b">
-                      <button
-                        onClick={() => handleDelete(file.id)}
-                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                      >
-                        Delete
-                      </button>
+                    <td className="px-6 py-4 border-b space-x-2">
+                      {editMode === file.id ? (
+                        <>
+                          <button
+                            onClick={() => handleUpdate(file.id)}
+                            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mr-2"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditMode(null)}
+                            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleEdit(file)}
+                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(file.id)}
+                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}

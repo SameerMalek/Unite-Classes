@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-
+import './Pages.css'
 const CourseDetailPage = () => {
   const { classId, subjectName, categoryType } = useParams();
   const [files, setFiles] = useState([]);
@@ -39,7 +39,7 @@ const CourseDetailPage = () => {
             <div key={file.fileName} className="file-card">
               <h2>{file.fileName}</h2>
               <a href={file.fileUrl} target="_blank" rel="noopener noreferrer">
-                Download
+                View
               </a>
               <p>Uploaded At: {new Date(file.uploadedAt).toLocaleDateString()}</p>
             </div>

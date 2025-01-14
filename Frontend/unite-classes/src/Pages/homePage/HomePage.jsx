@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import "./HomePage.css";
+import "../homePage/Pages.css"
 
 const HomePage = () => {
   const [classes, setClasses] = useState([]);
@@ -36,12 +36,12 @@ const HomePage = () => {
 
   return (
     <div>
-      <h1>Welcome to Unite Classes</h1>
+      <strong><h1>Welcome to Unite Classes</h1></strong>
+      
       <div className="card-container">
         {classes.map((cls) => (
-        <Link key={cls._id} to={`/class/${cls._id}`} className="card"> 
-        <h2>{cls.className}</h2> 
-      </Link>
+          <Link key={cls._id} to={`/class/${cls._id}`} className="card" style={{ backgroundImage: `url(${cls.backgroundImage})` }}> 
+          </Link>
         ))}
       </div>
     </div>

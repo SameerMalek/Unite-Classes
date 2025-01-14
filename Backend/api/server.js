@@ -39,9 +39,11 @@ connect(process.env.MONGODB_URI, {
 const fileSchema = new Schema({
   fileName: String,
   fileUrl: String,
+  className: String,  // Add these new fields
+  subject: String,
+  category: String,
   uploadedAt: { type: Date, default: Date.now },
 });
-
 const categorySchema = new Schema({
   type: String,
   files: [fileSchema],
@@ -57,7 +59,20 @@ const classSchema = new Schema({
   subjects: [subjectSchema],
 });
 
+
+
+const File = model("File", fileSchema);
 const Class = model("Class", classSchema);
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, 'uploads/')); // Ensure correct path
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
 
 // API Endpoints
 // Get all classes
@@ -183,57 +198,146 @@ const authenticateAdmin = (req, res, next) => {
   }
 };
 
-// Admin login
+// Modify the admin login endpoint to include more secure error handling
 app.post('/api/admin/login', async (req, res) => {
-  const { username, password } = req.body;
-  
-  // Replace these with your actual admin credentials
-  const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'sakil';
-
-  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-    const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '24h' });
-    res.json({ token });
-  } else {
-    res.status(401).json({ message: 'Invalid credentials' });
+  try {
+    const { username, password } = req.body;
+    
+    const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+    if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
+      throw new Error("Admin credentials not set in environment variables.");
+    }
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      const token = jwt.sign({ username }, process.env.JWT_SECRET || 'your-secret-key', { expiresIn: '24h' });
+      res.json({ token, message: 'Login successful' });
+    } else {
+      res.status(401).json({ message: 'Invalid credentials' });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error during login' });
   }
 });
 
-// Set up multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, 'uploads/'));  // Ensure correct path
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-
-const upload = multer({ storage: storage });
-
-// Upload file
+// Modify the upload endpoint to save file information in both collections
 app.post('/api/admin/upload', authenticateAdmin, upload.single('file'), async (req, res) => {
   try {
+    const { className, subject, category } = req.body;
     const file = req.file;
 
-    if (!file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+    if (!file || !className || !subject || !category) {
+      return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // Generate file URL
-    const fileUrl = `${process.env.BASE_URL}/uploads/${file.filename}`;
-
-    // Respond with the file URL
-    res.json({
-      message: 'File uploaded successfully',
-      fileUrl: fileUrl
+    const fileUrl = `${process.env.BASE_URL || 'http://localhost:8800'}/uploads/${file.filename}`;
+    const newFile = new File({
+      fileName: file.originalname,
+      fileUrl,
+      className,
+      subject,
+      category,
     });
+    await newFile.save();
+
+    let classDoc = await Class.findOne({ className });
+    if (!classDoc) {
+      classDoc = new Class({ className, subjects: [] });
+    }
+
+    let subjectDoc = classDoc.subjects.find(s => s.name === subject);
+    if (!subjectDoc) {
+      subjectDoc = { name: subject, categories: [] };
+      classDoc.subjects.push(subjectDoc);
+    }
+
+    let categoryDoc = subjectDoc.categories.find(c => c.type === category);
+    if (!categoryDoc) {
+      categoryDoc = { type: category, files: [] };
+      subjectDoc.categories.push(categoryDoc);
+    }
+
+    categoryDoc.files.push({
+      fileName: file.originalname,
+      fileUrl,
+      uploadedAt: new Date(),
+    });
+
+    await classDoc.save();
+    res.json({ message: 'File uploaded successfully', fileUrl, file: newFile });
   } catch (error) {
     console.error('Error uploading file:', error);
     res.status(500).json({ message: 'Error uploading file', error: error.message });
   }
 });
 
+
+// Update file details
+app.put('/api/admin/files/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { className, subject, category } = req.body;
+
+    const updatedFile = await File.findByIdAndUpdate(
+      id,
+      { className, subject, category },
+      { new: true }
+    );
+
+    if (!updatedFile) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+
+    res.json(updatedFile);
+  } catch (error) {
+    console.error('Error updating file:', error);
+    res.status(500).json({ message: 'Error updating file', error: error.message });
+  }
+});
+
+// Delete file
+app.delete('/api/admin/files/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const file = await File.findById(id);
+
+    if (!file) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+
+    // Delete file from storage
+    const filePath = path.join(__dirname, 'uploads', path.basename(file.fileUrl));
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    // Delete file document
+    await File.findByIdAndDelete(id);
+
+    // Remove file from class structure
+    const classes = await Class.find({});
+    for (let classDoc of classes) {
+      let modified = false;
+      classDoc.subjects.forEach(subject => {
+        subject.categories.forEach(category => {
+          const fileIndex = category.files.findIndex(f => f.fileUrl === file.fileUrl);
+          if (fileIndex !== -1) {
+            category.files.splice(fileIndex, 1);
+            modified = true;
+          }
+        });
+      });
+      if (modified) {
+        await classDoc.save();
+      }
+    }
+
+    res.json({ message: 'File deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    res.status(500).json({ message: 'Error deleting file', error: error.message });
+  }
+});
 // Get all files
 app.get('/api/admin/files', authenticateAdmin, async (req, res) => {
   try {

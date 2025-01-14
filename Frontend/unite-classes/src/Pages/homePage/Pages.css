@@ -1,0 +1,175 @@
+/* Additional Custom Styles for HomePage */
+body {
+  margin: 0; /* Remove default browser margins */
+}
+h1{
+  font-weight: bold;
+}
+.container {
+max-width:100%;
+padding: 0px;
+}
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Fixed 3 columns for large screens */
+  gap: 20px;
+  padding: 20px;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+
+  border-radius: 10px;
+  color: #fff;
+  text-decoration: none;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.2s ease-in-out;
+  width: 100%; /* Take full width of grid cell */
+  height: 300px;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card h2 {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: bold;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 5px;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  margin: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+} 
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+  opacity: 0.5;
+}
+
+/* Medium screens */
+@media (max-width: 1024px) {
+  .card-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 16px;
+  }
+}
+
+/* Small screens */
+@media (max-width: 640px) {
+  .card-container {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    height: 300px;
+  }
+
+  .card h2 {
+    font-size: 1rem;
+    padding: 8px 16px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 320px) {
+  .card {
+    height: 250px;
+  }
+}
+
+
+/* General Page Styles */
+.category-content-page {
+  padding: 20px;
+  background-color: #f9f9f9;
+  color: #333;
+  font-family: 'Arial', sans-serif;
+}
+
+.category-content-page h1 {
+  text-align: center;
+  color: #0077cc;
+  margin-bottom: 20px;
+}
+
+/* Table Styling */
+.file-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  background-color: #fff;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.file-table th,
+.file-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.file-table th {
+  background-color: #0077cc;
+  color: white;
+  font-weight: bold;
+}
+
+.file-table td.actions-cell {
+  text-align: right; /* Align buttons to the right */
+}
+
+.file-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.file-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Buttons Styling */
+.view-button,
+.download-button {
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-left: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.view-button:hover {
+  background-color: #005fa3;
+}
+
+.download-button {
+  background-color: #28a745;
+}
+
+.download-button:hover {
+  background-color: #218838;
+}

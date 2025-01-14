@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import "./CategoryContentPage.css";
+import "../homePage/Pages.css";
 
 const CategoryContentPage = () => {
   const { classId, subjectName, categoryType } = useParams();
@@ -38,28 +38,56 @@ const CategoryContentPage = () => {
     fetchFiles();
   }, [classId, subjectName, categoryType]);
 
+  const handleDownload = (fileUrl, fileName) => {
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) return <div>Loading files...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div>
+    <div className="category-content-page">
       <h1>Files in {categoryType}</h1>
-      <div className="file-container">
-        {files.length === 0 ? (
-          <p>No files available for this category.</p>
-        ) : (
-          files.map((file) => (
-            <div key={file.fileName} className="file-card">
-              <h2>{file.fileName}</h2>
-              <a href={file.fileUrl} target="_blank" rel="noopener noreferrer">
-                Download
-              </a>
-              <p>Uploaded At: {new Date(file.uploadedAt).toLocaleDateString()}</p>
-            </div>
-          ))
-        )}
-      </div>
-      <a href={`/classes/${classId}/subjects/${subjectName}/categories`}>Back to Categories</a>
+      {files.length === 0 ? (
+        <p>No files available for this category.</p>
+      ) : (
+        <table className="file-table">
+          <thead>
+            <tr>
+              <th>Sr. No.</th>
+              <th>File Name</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {files.map((file, index) => (
+              <tr key={file.fileName}>
+                <td>{index + 1}</td>
+                <td>{file.fileName}</td>
+                <td className="actions-cell">
+                  <button
+                    className="view-button"
+                    onClick={() => window.open(file.fileUrl, "_blank")}
+                  >
+                    View
+                  </button>
+                  <button
+                    className="download-button"
+                    onClick={() => handleDownload(file.fileUrl, file.fileName)}
+                  >
+                    Download
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };

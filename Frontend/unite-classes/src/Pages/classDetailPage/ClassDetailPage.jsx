@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+// import "./ClassDetailPage.css";
+import '../homePage/Pages.css'
+
 
 const ClassDetailPage = () => {
   const { classId } = useParams();
@@ -27,25 +30,24 @@ const ClassDetailPage = () => {
     fetchSubjects();
   }, [classId]);
 
-  // Render error message if there is an issue fetching the data
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div>
       <h1>Subjects</h1>
       <div className="card-container">
-        {/* Show a message if no subjects are found */}
-        {subjects.length === 0 ? (
-          <p>No subjects found for this class.</p>
-        ) : (
-          subjects.map((subject) => (
-            <div key={subject._id} className="card">
-              <Link to={`/classes/${classId}/subjects/${subject.name}/categories`}>
-                <h2 className="subjectName">{subject.name}</h2>
-              </Link>
-            </div>
+          {subjects.map((subject) => (
+            <Link
+              key={subject.name}
+              to={`/classes/${classId}/subjects/${subject.name}/categories`}
+              className="card"
+              style={{ 
+                backgroundImage: `url(${subject.backgroundImage || "https://via.placeholder.com/300"})`,
+              }}
+            >
+            </Link>
           ))
-        )}
+        }
       </div>
     </div>
   );
