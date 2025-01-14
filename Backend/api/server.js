@@ -2,18 +2,21 @@ import express, { json } from "express";
 import { connect, Schema, model } from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import jwt from 'jsonwebtoken';
-import multer from 'multer';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import jwt from "jsonwebtoken";
+import multer from "multer";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
+// Load environment variables
 dotenv.config();
 
 // Fix for ES Modules to get the directory name
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Ensure MONGODB_URI is defined
 if (!process.env.MONGODB_URI) {
   console.error("MONGODB_URI is not defined in the environment variables.");
   process.exit(1);
@@ -23,6 +26,7 @@ const app = express();
 app.use(cors());
 app.use(json());
 
+// MongoDB Connection
 connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -35,15 +39,16 @@ connect(process.env.MONGODB_URI, {
     process.exit(1); // Exit the process if the connection fails
   });
 
-// Define Schemas and Models
+// Schemas and Models
 const fileSchema = new Schema({
   fileName: String,
   fileUrl: String,
-  className: String,  // Add these new fields
+  className: String,
   subject: String,
   category: String,
   uploadedAt: { type: Date, default: Date.now },
 });
+
 const categorySchema = new Schema({
   type: String,
   files: [fileSchema],
@@ -59,23 +64,23 @@ const classSchema = new Schema({
   subjects: [subjectSchema],
 });
 
-
-
 const File = model("File", fileSchema);
 const Class = model("Class", classSchema);
+
+// Multer Storage Configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, 'uploads/')); // Ensure correct path
+    cb(null, path.join(__dirname, "uploads/"));
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   },
 });
-
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 // API Endpoints
 // Get all classes
+
 app.get("/api/classes", async (req, res) => {
   try {
     const classes = await Class.find(); // Fetch all documents
@@ -181,12 +186,12 @@ app.get("/api/classes/:classId/subjects/:subjectName/categories/:categoryType", 
   }
 });
 
-// Admin authentication middleware
+// Admin Authentication Middleware
 const authenticateAdmin = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  
+  const token = req.headers.authorization?.split(" ")[1];
+
   if (!token) {
-    return res.status(401).json({ message: 'No token provided' });
+    return res.status(401).json({ message: "No token provided" });
   }
 
   try {
@@ -194,90 +199,80 @@ const authenticateAdmin = (req, res, next) => {
     req.admin = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Invalid token' });
+    res.status(401).json({ message: "Invalid token" });
   }
 };
 
-// Modify the admin login endpoint to include more secure error handling
-app.post('/api/admin/login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    
-    const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
-    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-    if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
-      throw new Error("Admin credentials not set in environment variables.");
-    }
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      const token = jwt.sign({ username }, process.env.JWT_SECRET || 'your-secret-key', { expiresIn: '24h' });
-      res.json({ token, message: 'Login successful' });
-    } else {
-      res.status(401).json({ message: 'Invalid credentials' });
-    }
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error during login' });
+// Routes
+// Admin Login
+app.post("/api/admin/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    const token = jwt.sign({ username }, process.env.JWT_SECRET, {
+      expiresIn: "24h",
+    });
+    return res.json({ token, message: "Login successful" });
+  } else {
+    return res.status(401).json({ message: "Invalid credentials" });
   }
 });
 
-// Modify the upload endpoint to save file information in both collections
-app.post('/api/admin/upload', authenticateAdmin, upload.single('file'), async (req, res) => {
+// Fetch Files
+app.get("/api/admin/files", authenticateAdmin, async (req, res) => {
   try {
-    const { className, subject, category } = req.body;
-    const file = req.file;
+    const files = await File.find();
+    const formattedFiles = files.map(file => ({
+      id: file._id,
+      fileName: file.fileName,
+      fileUrl: file.fileUrl,
+      className: file.className,
+      subject: file.subject,
+      category: file.category,
+      uploadedAt: file.uploadedAt
+    }));
+    res.json(formattedFiles);
+  } catch (error) {
+    console.error("Error fetching files:", error.message);
+    res.status(500).json({ message: "Error fetching files", error: error.message });
+  }
+});
 
-    if (!file || !className || !subject || !category) {
-      return res.status(400).json({ message: 'Missing required fields' });
-    }
+// Upload File
+app.post("/api/admin/upload", authenticateAdmin, upload.single("file"), async (req, res) => {
+  const { className, subject, category } = req.body;
+  const file = req.file;
 
-    const fileUrl = `${process.env.BASE_URL || 'http://localhost:8800'}/uploads/${file.filename}`;
-    const newFile = new File({
-      fileName: file.originalname,
-      fileUrl,
-      className,
-      subject,
-      category,
-    });
+  if (!file || !className || !subject || !category) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
+  const newFile = new File({
+    fileName: file.originalname,
+    fileUrl,
+    className,
+    subject,
+    category,
+  });
+
+  try {
     await newFile.save();
-
-    let classDoc = await Class.findOne({ className });
-    if (!classDoc) {
-      classDoc = new Class({ className, subjects: [] });
-    }
-
-    let subjectDoc = classDoc.subjects.find(s => s.name === subject);
-    if (!subjectDoc) {
-      subjectDoc = { name: subject, categories: [] };
-      classDoc.subjects.push(subjectDoc);
-    }
-
-    let categoryDoc = subjectDoc.categories.find(c => c.type === category);
-    if (!categoryDoc) {
-      categoryDoc = { type: category, files: [] };
-      subjectDoc.categories.push(categoryDoc);
-    }
-
-    categoryDoc.files.push({
-      fileName: file.originalname,
-      fileUrl,
-      uploadedAt: new Date(),
-    });
-
-    await classDoc.save();
-    res.json({ message: 'File uploaded successfully', fileUrl, file: newFile });
+    res.status(201).json({ message: "File uploaded successfully", file: newFile });
   } catch (error) {
-    console.error('Error uploading file:', error);
-    res.status(500).json({ message: 'Error uploading file', error: error.message });
+    res.status(500).json({ message: "Error saving file", error });
   }
 });
 
+// Update File
+app.put("/api/admin/files/:id", authenticateAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { className, subject, category } = req.body;
 
-// Update file details
-app.put('/api/admin/files/:id', authenticateAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { className, subject, category } = req.body;
-
     const updatedFile = await File.findByIdAndUpdate(
       id,
       { className, subject, category },
@@ -285,104 +280,42 @@ app.put('/api/admin/files/:id', authenticateAdmin, async (req, res) => {
     );
 
     if (!updatedFile) {
-      return res.status(404).json({ message: 'File not found' });
+      return res.status(404).json({ message: "File not found" });
     }
 
-    res.json(updatedFile);
+    res.json({ message: "File updated successfully", file: updatedFile });
   } catch (error) {
-    console.error('Error updating file:', error);
-    res.status(500).json({ message: 'Error updating file', error: error.message });
+    res.status(500).json({ message: "Error updating file", error });
   }
 });
 
-// Delete file
-app.delete('/api/admin/files/:id', authenticateAdmin, async (req, res) => {
+// Delete File
+app.delete("/api/admin/files/:id", authenticateAdmin, async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const { id } = req.params;
-    const file = await File.findById(id);
+    const file = await File.findByIdAndDelete(id);
 
     if (!file) {
-      return res.status(404).json({ message: 'File not found' });
+      return res.status(404).json({ message: "File not found" });
     }
 
-    // Delete file from storage
-    const filePath = path.join(__dirname, 'uploads', path.basename(file.fileUrl));
+    const filePath = path.join(__dirname, "uploads", path.basename(file.fileUrl));
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
 
-    // Delete file document
-    await File.findByIdAndDelete(id);
-
-    // Remove file from class structure
-    const classes = await Class.find({});
-    for (let classDoc of classes) {
-      let modified = false;
-      classDoc.subjects.forEach(subject => {
-        subject.categories.forEach(category => {
-          const fileIndex = category.files.findIndex(f => f.fileUrl === file.fileUrl);
-          if (fileIndex !== -1) {
-            category.files.splice(fileIndex, 1);
-            modified = true;
-          }
-        });
-      });
-      if (modified) {
-        await classDoc.save();
-      }
-    }
-
-    res.json({ message: 'File deleted successfully' });
+    res.json({ message: "File deleted successfully" });
   } catch (error) {
-    console.error('Error deleting file:', error);
-    res.status(500).json({ message: 'Error deleting file', error: error.message });
-  }
-});
-// Get all files
-app.get('/api/admin/files', authenticateAdmin, async (req, res) => {
-  try {
-    const classes = await Class.find();
-    const files = [];
-
-    classes.forEach(classDoc => {
-      classDoc.subjects.forEach(subject => {
-        subject.categories.forEach(category => {
-          category.files.forEach(file => {
-            files.push({
-              id: file._id,
-              fileName: file.fileName,
-              fileUrl: file.fileUrl,
-              className: classDoc.className,
-              subject: subject.name,
-              category: category.type,
-              uploadedAt: file.uploadedAt
-            });
-          });
-        });
-      });
-    });
-
-    res.json(files);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching files', error: error.message });
+    res.status(500).json({ message: "Error deleting file", error });
   }
 });
 
-// Static file serving for uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static File Serving
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Error handling for missing static files
-app.use((req, res, next) => {
-  const error = new Error('Not Found');
-  error.status = 404;
-  next(error);
+// Start Server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-// Handle errors globally
-app.use((err, req, res, next) => {
-  res.status(err.status || 500).json({ message: err.message });
-});
-
-// Start the server
-const PORT = process.env.PORT || 8800;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
