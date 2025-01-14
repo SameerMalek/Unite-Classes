@@ -1,0 +1,9 @@
+.card a {
+    text-decoration: none; /* Removes the underline */
+    color: inherit; /* Ensures the link takes the color from its parent */
+  }
+  
+  .card a:hover {
+    text-decoration: none; /* Ensures the underline does not appear on hover */
+  }
+  

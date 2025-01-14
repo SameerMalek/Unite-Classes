@@ -41,7 +41,7 @@ const ClassDetailPage = () => {
           subjects.map((subject) => (
             <div key={subject._id} className="card">
               <Link to={`/classes/${classId}/subjects/${subject.name}/categories`}>
-                <h2>{subject.name}</h2>
+                <h2 className="subjectName">{subject.name}</h2>
               </Link>
             </div>
           ))

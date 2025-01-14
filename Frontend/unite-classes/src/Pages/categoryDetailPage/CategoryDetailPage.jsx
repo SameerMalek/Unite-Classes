@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import "./CategoryDetailPage.css";
 
 const CategoryDetailPage = () => {
   const { classId, subjectName } = useParams();

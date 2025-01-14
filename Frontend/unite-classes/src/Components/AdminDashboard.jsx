@@ -1,6 +1,7 @@
 // src/components/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
+import "./Admin.css";
 
 const AdminDashboard = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('adminToken'));
