@@ -90,7 +90,9 @@ app.get("/api/classes", async (req, res) => {
     res.json(classes);
   } catch (error) {
     console.error("Error fetching classes:", error);
-    res.status(500).json({ message: "Error fetching classes", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching classes", error: error.message });
   }
 });
 
@@ -106,7 +108,9 @@ app.get("/api/classes/:classId", async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching class data:", error);
-    res.status(500).json({ message: "Error fetching class data", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching class data", error: error.message });
   }
 });
 // Backend route to fetch subject categories
@@ -117,7 +121,9 @@ app.get("/api/classes/:classId/subjects/:subjectName", async (req, res) => {
     const classData = await Class.findById(classId); // Fetch class data using the class ID
     if (classData) {
       // Find the subject by name
-      const subjectData = classData.subjects.find(subject => subject.name === subjectName);
+      const subjectData = classData.subjects.find(
+        (subject) => subject.name === subjectName
+      );
 
       if (subjectData) {
         // Return subject data with categories
@@ -130,59 +136,120 @@ app.get("/api/classes/:classId/subjects/:subjectName", async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching subject data:", error);
-    res.status(500).json({ message: "Failed to fetch subject data", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch subject data", error: error.message });
   }
 });
 
 // Fetch categories for a specific subject in a class
-app.get("/api/classes/:classId/subjects/:subjectName/categories", async (req, res) => {
-  const { classId, subjectName } = req.params;
-  try {
-    const classData = await Class.findById(classId); // Fetch the class by ID
-    if (!classData) {
-      return res.status(404).json({ message: "Class not found" });
+app.get(
+  "/api/classes/:classId/subjects/:subjectName/categories",
+  async (req, res) => {
+    const { classId, subjectName } = req.params;
+    try {
+      const classData = await Class.findById(classId); // Fetch the class by ID
+      if (!classData) {
+        return res.status(404).json({ message: "Class not found" });
+      }
+
+      // Find the subject by name
+      const subjectData = classData.subjects.find(
+        (subject) => subject.name === subjectName
+      );
+
+      if (!subjectData) {
+        return res.status(404).json({ message: "Subject not found" });
+      }
+
+      res.json(subjectData.categories); // Return the categories
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      res
+        .status(500)
+        .json({ message: "Failed to fetch categories", error: error.message });
     }
-
-    // Find the subject by name
-    const subjectData = classData.subjects.find(
-      (subject) => subject.name === subjectName
-    );
-
-    if (!subjectData) {
-      return res.status(404).json({ message: "Subject not found" });
-    }
-
-    res.json(subjectData.categories); // Return the categories
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-    res.status(500).json({ message: "Failed to fetch categories", error: error.message });
   }
-});
+);
 
 // Fetch files for a specific category
-app.get("/api/classes/:classId/subjects/:subjectName/categories/:categoryType", async (req, res) => {
-  const { classId, subjectName, categoryType } = req.params;
+app.get(
+  "/api/classes/:classId/subjects/:subjectName/categories/:categoryType",
+  async (req, res) => {
+    const { classId, subjectName, categoryType } = req.params;
 
+    try {
+      const classData = await Class.findById(classId);
+      if (!classData) {
+        return res.status(404).json({ message: "Class not found" });
+      }
+
+      const subjectData = classData.subjects.find(
+        (subject) => subject.name === subjectName
+      );
+      if (!subjectData) {
+        return res.status(404).json({ message: "Subject not found" });
+      }
+
+      const categoryData = subjectData.categories.find(
+        (category) => category.type === categoryType
+      );
+      if (!categoryData) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+
+      res.json(categoryData);
+    } catch (error) {
+      console.error("Error fetching files for category:", error.message);
+      res.status(500).json({
+        message: "Failed to fetch files for category",
+        error: error.message,
+      });
+    }
+  }
+);
+
+app.get("/api/classes/:classId/subjects/:subjectName/categories/:categoryType/files", async (req, res) => {
   try {
+    const { classId, subjectName, categoryType } = req.params;
+
+    // Find the specific class
     const classData = await Class.findById(classId);
     if (!classData) {
       return res.status(404).json({ message: "Class not found" });
     }
 
-    const subjectData = classData.subjects.find((subject) => subject.name === subjectName);
-    if (!subjectData) {
+    // Find the specific subject
+    const subject = classData.subjects.find(
+      (subj) => subj.name === subjectName
+    );
+    if (!subject) {
       return res.status(404).json({ message: "Subject not found" });
     }
 
-    const categoryData = subjectData.categories.find((category) => category.type === categoryType);
-    if (!categoryData) {
+    // Find the specific category
+    const category = subject.categories.find(
+      (cat) => cat.type === categoryType
+    );
+    if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    res.json(categoryData);
+    // Return the files array
+    res.json({
+      files: category.files.map(file => ({
+        fileName: file.fileName,
+        fileUrl: file.fileUrl,
+        uploadedAt: file.uploadedAt
+      }))
+    });
+
   } catch (error) {
-    console.error("Error fetching files for category:", error.message);
-    res.status(500).json({ message: "Failed to fetch files for category", error: error.message });
+    console.error("Error fetching category files:", error);
+    res.status(500).json({ 
+      message: "Error fetching category files", 
+      error: error.message 
+    });
   }
 });
 
@@ -191,6 +258,7 @@ const authenticateAdmin = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
+    console.error("No token provided");
     return res.status(401).json({ message: "No token provided" });
   }
 
@@ -199,6 +267,7 @@ const authenticateAdmin = (req, res, next) => {
     req.admin = decoded;
     next();
   } catch (error) {
+    console.error("Invalid token:", error.message);
     res.status(401).json({ message: "Invalid token" });
   }
 };
@@ -224,90 +293,281 @@ app.post("/api/admin/login", async (req, res) => {
 // Fetch Files
 app.get("/api/admin/files", authenticateAdmin, async (req, res) => {
   try {
-    const files = await File.find();
-    const formattedFiles = files.map(file => ({
-      id: file._id,
-      fileName: file.fileName,
-      fileUrl: file.fileUrl,
-      className: file.className,
-      subject: file.subject,
-      category: file.category,
-      uploadedAt: file.uploadedAt
-    }));
-    res.json(formattedFiles);
+    // Find all classes with explicit population of nested fields
+    const classes = await Class.find()
+      .populate({
+        path: 'subjects',
+        populate: {
+          path: 'categories',
+          populate: {
+            path: 'files'
+          }
+        }
+      });
+
+    // Initialize array to store all files
+    const allFiles = [];
+
+    // Debug log
+    console.log('Classes found:', classes.length);
+
+    // Safely traverse the nested structure
+    for (const classObj of classes) {
+      if (!classObj.subjects) continue;
+      
+      for (const subject of classObj.subjects) {
+        if (!subject.categories) continue;
+        
+        // Fixed: Changed 'category' to 'categoryObj'
+        for (const categoryObj of subject.categories) {
+          if (!categoryObj.files) continue;
+          
+          for (const file of categoryObj.files) {
+            allFiles.push({
+              id: file._id,
+              fileName: file.fileName,
+              fileUrl: file.fileUrl,
+              className: classObj.className,
+              subject: subject.name,
+              category: categoryObj.type,
+              uploadedAt: file.uploadedAt
+            });
+          }
+        }
+      }
+    }
+
+    // Debug logging
+    console.log(`Successfully retrieved ${allFiles.length} files`);
+    
+    return res.json(allFiles);
   } catch (error) {
-    console.error("Error fetching files:", error.message);
-    res.status(500).json({ message: "Error fetching files", error: error.message });
+    console.error("Error fetching files:", error);
+    return res.status(500).json({ 
+      message: "Error fetching files", 
+      error: error.message 
+    });
   }
 });
 
 // Upload File
-app.post("/api/admin/upload", authenticateAdmin, upload.single("file"), async (req, res) => {
-  const { className, subject, category } = req.body;
-  const file = req.file;
+app.post(
+  "/api/admin/upload",
+  authenticateAdmin,
+  upload.single("file"),
+  async (req, res) => {
+    const { className, subject, category } = req.body;
+    const file = req.file;
 
-  if (!file || !className || !subject || !category) {
-    return res.status(400).json({ message: "Missing required fields" });
+    if (!file || !className || !subject || !category) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${
+      file.filename
+    }`;
+    try {
+      const classData = await Class.findOne({ className });
+      if (!classData) {
+        return res.status(404).json({ message: "Class not found" });
+      }
+
+      const subjectData = classData.subjects.find(
+        (subj) => subj.name === subject
+      );
+      if (!subjectData) {
+        return res.status(404).json({ message: "Subject not found" });
+      }
+
+      const categoryData = subjectData.categories.find(
+        (cat) => cat.type === category
+      );
+      if (!categoryData) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+
+      categoryData.files.push({ fileName: file.originalname, fileUrl });
+      await classData.save();
+
+      res.status(201).json({ message: "File uploaded successfully", fileUrl });
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      res.status(500).json({ message: "Failed to upload file", error });
+    }
+  }
+);
+
+// Update File
+app.put("/api/admin/files/:fileId", authenticateAdmin, async (req, res) => {
+  const { fileId } = req.params;
+  const { className, subject, category, fileName } = req.body;
+
+  try {
+    // Find the class containing the file
+    const classDoc = await Class.findOne({ className });
+    if (!classDoc) {
+      return res.status(404).json({ message: "Class not found" });
+    }
+
+    // Find the subject
+    const subjectDoc = classDoc.subjects.find(s => s.name === subject);
+    if (!subjectDoc) {
+      return res.status(404).json({ message: "Subject not found" });
+    }
+
+    // Find the category
+    const categoryDoc = subjectDoc.categories.find(c => c.type === category);
+    if (!categoryDoc) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    // Find and update the file
+    const fileDoc = categoryDoc.files.id(fileId);
+    if (!fileDoc) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    // Update file properties
+    if (fileName) fileDoc.fileName = fileName;
+    
+    // Save the updated document
+    await classDoc.save();
+
+    res.json({ 
+      message: "File updated successfully", 
+      file: {
+        id: fileDoc._id,
+        fileName: fileDoc.fileName,
+        fileUrl: fileDoc.fileUrl,
+        className,
+        subject,
+        category,
+        uploadedAt: fileDoc.uploadedAt
+      }
+    });
+  } catch (error) {
+    console.error("Error updating file:", error);
+    res.status(500).json({ message: "Error updating file", error: error.message });
+  }
+});
+
+// Delete Function
+app.delete("/api/admin/files/:fileId", authenticateAdmin, async (req, res) => {
+  const { fileId } = req.params;
+  const { className, subject, category } = req.query;
+
+  // Validate required parameters
+  if (!className || !subject || !category) {
+    return res.status(400).json({ 
+      message: "Missing required query parameters",
+      required: {
+        className: "Required - one of: " + (await Class.distinct('className')).join(', '),
+        subject: "Required - subject name",
+        category: "Required - category type"
+      },
+      received: {
+        className,
+        subject,
+        category
+      },
+      example: `http://localhost:5000/api/admin/files/${fileId}?className=Class 10&subject=YourSubject&category=YourCategory`
+    });
   }
 
-  const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
-  const newFile = new File({
-    fileName: file.originalname,
-    fileUrl,
+  // Log the incoming parameters
+  console.log('Delete file request:', {
+    fileId,
     className,
     subject,
-    category,
+    category
   });
 
   try {
-    await newFile.save();
-    res.status(201).json({ message: "File uploaded successfully", file: newFile });
-  } catch (error) {
-    res.status(500).json({ message: "Error saving file", error });
-  }
-});
+    // Find the class containing the file
+    const classDoc = await Class.findOne({ className });
+    console.log('Class search result:', classDoc ? 'Found' : 'Not found');
+    
+    if (!classDoc) {
+      const availableClasses = await Class.distinct('className');
+      return res.status(404).json({ 
+        message: "Class not found",
+        searchedFor: { className },
+        availableClasses
+      });
+    }
 
-// Update File
-app.put("/api/admin/files/:id", authenticateAdmin, async (req, res) => {
-  const { id } = req.params;
-  const { className, subject, category } = req.body;
+    // Find the subject
+    const subjectDoc = classDoc.subjects.find(s => s.name === subject);
+    console.log('Subject search result:', subjectDoc ? 'Found' : 'Not found');
+    
+    if (!subjectDoc) {
+      return res.status(404).json({ 
+        message: "Subject not found",
+        searchedFor: { className, subject },
+        availableSubjects: classDoc.subjects.map(s => s.name)
+      });
+    }
 
-  try {
-    const updatedFile = await File.findByIdAndUpdate(
-      id,
-      { className, subject, category },
-      { new: true }
+    // Find the category
+    const categoryDoc = subjectDoc.categories.find(c => c.type === category);
+    console.log('Category search result:', categoryDoc ? 'Found' : 'Not found');
+    
+    if (!categoryDoc) {
+      return res.status(404).json({ 
+        message: "Category not found",
+        searchedFor: { className, subject, category },
+        availableCategories: subjectDoc.categories.map(c => c.type)
+      });
+    }
+
+    // Find the file
+    const fileDoc = categoryDoc.files.id(fileId);
+    console.log('File search result:', fileDoc ? 'Found' : 'Not found');
+    
+    if (!fileDoc) {
+      return res.status(404).json({ 
+        message: "File not found",
+        searchedFor: { className, subject, category, fileId },
+        availableFileIds: categoryDoc.files.map(f => f._id)
+      });
+    }
+
+    // Get the file path for deletion from filesystem
+    const filePath = path.join(
+      __dirname,
+      "uploads",
+      path.basename(fileDoc.fileUrl)
     );
 
-    if (!updatedFile) {
-      return res.status(404).json({ message: "File not found" });
-    }
+    // Remove the file from the category
+    fileDoc.remove();
+    await classDoc.save();
 
-    res.json({ message: "File updated successfully", file: updatedFile });
-  } catch (error) {
-    res.status(500).json({ message: "Error updating file", error });
-  }
-});
-
-// Delete File
-app.delete("/api/admin/files/:id", authenticateAdmin, async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const file = await File.findByIdAndDelete(id);
-
-    if (!file) {
-      return res.status(404).json({ message: "File not found" });
-    }
-
-    const filePath = path.join(__dirname, "uploads", path.basename(file.fileUrl));
+    // Delete the physical file if it exists
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
+      console.log('Physical file deleted:', filePath);
+    } else {
+      console.log('Physical file not found:', filePath);
     }
 
-    res.json({ message: "File deleted successfully" });
+    res.json({ 
+      message: "File deleted successfully",
+      deletedFile: {
+        id: fileId,
+        className,
+        subject,
+        category,
+        fileName: fileDoc.fileName
+      }
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting file", error });
+    console.error("Error deleting file:", error);
+    res.status(500).json({ 
+      message: "Error deleting file", 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

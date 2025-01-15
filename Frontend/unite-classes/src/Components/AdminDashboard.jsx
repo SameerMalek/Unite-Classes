@@ -73,22 +73,22 @@ const AdminDashboard = () => {
   const handleUpload = async (e) => {
     e.preventDefault();
   
-    if (!uploadData.file || uploadData.file.size > 5 * 1024 * 1024) {
-      setError('File is required and must be smaller than 5MB');
+    if (!uploadData.file || uploadData.file.size > 10 * 1024 * 1024) {
+      setError("File is required and must be smaller than 5MB");
       return;
     }
   
     const formData = new FormData();
-    formData.append('file', uploadData.file);
-    formData.append('className', uploadData.className);
-    formData.append('subject', uploadData.subject);
-    formData.append('category', uploadData.category);
+    formData.append("file", uploadData.file);
+    formData.append("className", uploadData.className);
+    formData.append("subject", uploadData.subject);
+    formData.append("category", uploadData.category);
   
     try {
-      const response = await fetch('http://localhost:5000/api/admin/upload', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/api/admin/upload", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
         },
         body: formData,
       });
@@ -96,28 +96,22 @@ const AdminDashboard = () => {
       if (response.ok) {
         const data = await response.json();
         setSuccess(`File uploaded successfully! URL: ${data.fileUrl}`);
-        fetchFiles();
+        fetchFiles(); // Refresh file data
         setUploadData({
           file: null,
-          className: '',
-          subject: '',
-          category: ''
+          className: "",
+          subject: "",
+          category: "",
         });
-        // Reset file input
-        document.querySelector('input[type="file"]').value = '';
+        document.querySelector('input[type="file"]').value = "";
       } else {
-        if (response.status === 401) {
-          setError('Unauthorized access. Please log in again.');
-          localStorage.removeItem('adminToken');
-          setIsLoggedIn(false);
-        } else {
-          setError('Upload failed');
-        }
+        setError("Upload failed");
       }
     } catch (error) {
-      setError('Upload failed. Please try again.');
+      setError("Upload failed. Please try again.");
     }
   };
+  
 
   const handleEdit = (file) => {
     setEditMode(file.id);
@@ -151,11 +145,11 @@ const AdminDashboard = () => {
     }
   };
   
-  const handleDelete = async (fileId) => {
+  const handleDelete = async (fileId, className, subject, category) => {
     if (!window.confirm('Are you sure you want to delete this file?')) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/files/${fileId}`, {
+      const response = await fetch(`http://localhost:5000/api/admin/files/${fileId}?className=${encodeURIComponent(className)}&subject=${encodeURIComponent(subject)}&category=${encodeURIComponent(category)}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`

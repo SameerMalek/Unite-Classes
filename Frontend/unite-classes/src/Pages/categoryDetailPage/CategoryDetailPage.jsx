@@ -49,17 +49,16 @@ const CategoryDetailPage = () => {
           <p>No categories found for this subject.</p>
         ) : (
           categories.map((category) => (
-           
-              <Link className="card" key={category._id}
-                to={`/classes/${classId}/subjects/${subjectName}/categories/${category.type}`}
-                style={{
-                
-                  backgroundImage: `url(${category.backgroundImage || "https://via.placeholder.com/300"})`,
-                }}
-              >
-                
-              </Link>
-            
+            <Link
+              className="card"
+              key={category._id}
+              to={`/classes/${classId}/subjects/${subjectName}/categories/${category.type}`}
+              style={{
+                backgroundImage: `url(${
+                  category.backgroundImage || "https://via.placeholder.com/300"
+                })`,
+              }}
+            ></Link>
           ))
         )}
       </div>

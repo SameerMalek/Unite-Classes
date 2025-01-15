@@ -16,7 +16,7 @@ const CategoryContentPage = () => {
         return;
       }
 
-      const apiUrl = `http://localhost:5000/api/classes/${classId}/subjects/${subjectName}/categories/${categoryType}`;
+      const apiUrl = `http://localhost:5000/api/classes/${classId}/subjects/${subjectName}/categories/${categoryType}/files`;
       console.log("Requesting URL:", apiUrl);
 
       try {
@@ -26,7 +26,14 @@ const CategoryContentPage = () => {
         }
 
         const data = await response.json();
-        setFiles(data.files || []);
+        console.log("Received data:", data); // Debug log
+        
+        if (data.files && Array.isArray(data.files)) {
+          setFiles(data.files);
+        } else {
+          console.error("Invalid data format received:", data);
+          setError("Invalid data format received from server");
+        }
       } catch (err) {
         console.error("Error fetching files:", err.message);
         setError(err.message);
@@ -39,6 +46,7 @@ const CategoryContentPage = () => {
   }, [classId, subjectName, categoryType]);
 
   const handleDownload = (fileUrl, fileName) => {
+    // Create a temporary link and trigger download
     const link = document.createElement("a");
     link.href = fileUrl;
     link.download = fileName;
@@ -47,46 +55,69 @@ const CategoryContentPage = () => {
     document.body.removeChild(link);
   };
 
-  if (loading) return <div>Loading files...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner">Loading files...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="error-message">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="category-content-page">
-      <h1>Files in {categoryType}</h1>
+      <h1>
+        Files in {categoryType} - {subjectName}
+      </h1>
       {files.length === 0 ? (
-        <p>No files available for this category.</p>
+        <div className="no-files-message">
+          <p>No files available for this category.</p>
+        </div>
       ) : (
-        <table className="file-table">
-          <thead>
-            <tr>
-              <th>Sr. No.</th>
-              <th>File Name</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {files.map((file, index) => (
-              <tr key={file.fileName}>
-                <td>{index + 1}</td>
-                <td>{file.fileName}</td>
-                <td className="actions-cell">
-                  <button
-                    className="view-button"
-                    onClick={() => window.open(file.fileUrl, "_blank")}
-                  >
-                    View
-                  </button>
-                  <button
-                    className="download-button"
-                    onClick={() => handleDownload(file.fileUrl, file.fileName)}
-                  >
-                    Download
-                  </button>
-                </td>
+        <div className="files-container">
+          <table className="file-table">
+            <thead>
+              <tr>
+                <th>Sr. No.</th>
+                <th>File Name</th>
+                <th>Uploaded</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {files.map((file, index) => (
+                <tr key={file.fileName || index}>
+                  <td>{index + 1}</td>
+                  <td>{file.fileName}</td>
+                  <td>
+                    {new Date(file.uploadedAt).toLocaleDateString()}
+                  </td>
+                  <td className="actions-cell">
+                    <button
+                      className="view-button"
+                      onClick={() => window.open(file.fileUrl, "_blank")}
+                    >
+                      View
+                    </button>
+                    <button
+                      className="download-button"
+                      onClick={() => handleDownload(file.fileUrl, file.fileName)}
+                    >
+                      Download
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
