@@ -1,0 +1,28 @@
+.carousel-inner img {
+    height: 550px;
+    object-fit: cover;
+    opacity:1;
+  }
+
+  .carousel-item img {
+    filter: brightness(90%);  /* This will reduce the brightness to 50% */
+    transition: filter 0.5s ease; /* Smooth transition for brightness change */
+  }
+  
+  .carousel-item img:hover {
+    filter: brightness(100%); /* Restore brightness on hover */
+  }
+  .carousel-control-prev:focus,
+.carousel-control-next:focus {
+  outline: none; /* Removes the focus outline */
+  box-shadow: none; /* Removes any additional browser-specific shadow */
+}
+.carousel-control-next, .carousel-control-prev {
+  outline: none;         /* Remove the outline around the button */
+  box-shadow: none;      /* Remove any shadow effect (including blue) */
+}
+
+.carousel-control-next:hover, .carousel-control-prev:hover {
+  background-color: transparent;  /* Remove background hover effect */
+  border: none;                    /* Remove any border on hover */
+}

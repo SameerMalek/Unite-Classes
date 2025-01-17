@@ -100,76 +100,88 @@ padding: 0px;
 }
 
 
-/* General Page Styles */
 .category-content-page {
   padding: 20px;
-  background-color: #f9f9f9;
-  color: #333;
-  font-family: 'Arial', sans-serif;
 }
 
 .category-content-page h1 {
   text-align: center;
-  color: #0077cc;
+  font-size: 1.5rem;
   margin-bottom: 20px;
 }
 
-/* Table Styling */
+.files-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .file-table {
   width: 100%;
   border-collapse: collapse;
-  margin: 20px 0;
-  background-color: #fff;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.file-table th,
+.file-table th, 
 .file-table td {
-  padding: 12px 15px;
+  padding: 10px;
   text-align: left;
   border: 1px solid #ddd;
 }
 
-.file-table th {
-  background-color: #0077cc;
-  color: white;
-  font-weight: bold;
-}
-
 .file-table td.actions-cell {
-  text-align: right; /* Align buttons to the right */
+  display: flex;
+  gap: 10px;
 }
 
-.file-table tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-
-.file-table tr:hover {
-  background-color: #f1f1f1;
-}
-
-/* Buttons Styling */
-.view-button,
-.download-button {
-  background-color: #0077cc;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
+.view-button, .download-button {
+  padding: 5px 10px;
   font-size: 0.9rem;
-  margin-left: 10px;
-  transition: background-color 0.3s ease;
+  border: none;
+  cursor: pointer;
 }
 
-.view-button:hover {
-  background-color: #005fa3;
+.view-button {
+  background-color: #007bff;
+  color: white;
 }
 
 .download-button {
   background-color: #28a745;
+  color: white;
 }
 
-.download-button:hover {
-  background-color: #218838;
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .file-table th, 
+  .file-table td {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  .file-table td.actions-cell {
+    flex-direction: column;
+  }
+
+  .view-button, 
+  .download-button {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-content-page h1 {
+    font-size: 1.2rem;
+  }
+
+  .file-table th, 
+  .file-table td {
+    font-size: 0.8rem;
+    padding: 6px;
+  }
+
+  .view-button, 
+  .download-button {
+    font-size: 0.8rem;
+    padding: 5px;
+  }
 }

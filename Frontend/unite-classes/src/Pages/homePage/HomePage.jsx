@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import "../homePage/Pages.css"
-
+import Carousel from '../Carousel'
 const HomePage = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +36,7 @@ const HomePage = () => {
 
   return (
     <div>
+      <Carousel />
       <strong><h1>Welcome to Unite Classes</h1></strong>
       
       <div className="card-container">

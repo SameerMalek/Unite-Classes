@@ -46,7 +46,6 @@ const CategoryContentPage = () => {
   }, [classId, subjectName, categoryType]);
 
   const handleDownload = (fileUrl, fileName) => {
-    // Create a temporary link and trigger download
     const link = document.createElement("a");
     link.href = fileUrl;
     link.download = fileName;
