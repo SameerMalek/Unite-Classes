@@ -63,8 +63,6 @@ const classSchema = new Schema({
   className: String,
   subjects: [subjectSchema],
 });
-
-const File = model("File", fileSchema);
 const Class = model("Class", classSchema);
 
 // Multer Storage Configuration
@@ -397,7 +395,7 @@ app.post(
   }
 );
 
-// Update File
+// // Update File
 app.put("/api/admin/files/:fileId", authenticateAdmin, async (req, res) => {
   const { fileId } = req.params;
   const { className, subject, category, fileName } = req.body;

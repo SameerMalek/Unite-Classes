@@ -29,13 +29,8 @@ const Navbar = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/about">
+              <Link className="nav-link" to="/About">
                 About
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/contact">
-                Contact
               </Link>
             </li>
           </ul>
@@ -77,16 +72,31 @@ const Navbar = () => {
 
 /* Navbar Links Styling */
 .nav-link {
-  color: gray;
+  color: gray;     
+ font-size: 20px;
   font-weight: 500; /* Lighten the weight of the font for readability */
   transition: color 0.3s ease, background-color 0.3s ease;
   padding: 8px 15px; /* Add padding for better clickability */
+}                        
+
+/* Navbar */
+.navbar {
+  background-color: #333333;  /* Dark background */
+  color: #FFAE13;             /* Front color for text */
 }
 
-.nav-link:hover {
-  color: #ffeb3b;
-  background-color: rgba(0, 0, 0, 0.1); /* Subtle hover background */
+.navbar a {
+  color: #FFAE13;             /* Text color for links */
+  text-decoration: none;
+  padding: 10px 15px;
+  font-weight: bold;
+  transition: color 0.3s ease;
 }
+
+.navbar a:hover {
+  color: #FF5733;             /* Hover color */
+}
+
 
 /* Active Link Styling */
 .nav-link.active {

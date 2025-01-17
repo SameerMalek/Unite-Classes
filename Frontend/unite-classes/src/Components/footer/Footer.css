@@ -18,8 +18,7 @@ h1 {
 }
 
 .footer {
-    background-color: #0077cc;
-    color: white;
+    
     text-align: center;
     padding: 15px 0;
     font-family: 'Poppins', sans-serif;
@@ -30,4 +29,10 @@ h1 {
   .footer p {
     margin: 0;
     font-size: 1rem;
+  }
+  .footer {
+    background-color: #333333;  /* Same dark background */
+    color: #d1d1d1;             /* Light grey text for better readability */
+    padding: 20px;
+    text-align: center;
   }
