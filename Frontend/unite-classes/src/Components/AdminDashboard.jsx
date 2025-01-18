@@ -146,27 +146,35 @@ const AdminDashboard = () => {
   };
   
   const handleDelete = async (fileId, className, subject, category) => {
-    if (!window.confirm('Are you sure you want to delete this file?')) return;
-
+    console.log("Delete Request Initiated:", { fileId, className, subject, category });
+  
+    if (!window.confirm("Are you sure you want to delete this file?")) return;
+  
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/files/${fileId}?className=${encodeURIComponent(className)}&subject=${encodeURIComponent(subject)}&category=${encodeURIComponent(category)}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+      const response = await fetch(
+        `http://localhost:5000/api/admin/files/${fileId}?className=${encodeURIComponent(className)}&subject=${encodeURIComponent(subject)}&category=${encodeURIComponent(category)}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`
+          }
         }
-      });
-
+      );
+  
+      const data = await response.json();
+  
       if (response.ok) {
-        setSuccess('File deleted successfully');
-        fetchFiles();
+        setSuccess("File deleted successfully");
+        fetchFiles(); // Refresh the file list
       } else {
-        setError('Delete failed');
+        console.error("Server response:", data);
+        setError(`Delete failed: ${data.message || "Unknown error"}`);
       }
     } catch (error) {
-      setError('Delete failed');
+      console.error("Delete failed:", error);
+      setError("An error occurred while deleting the file. Please check the console for details.");
     }
   };
-
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -259,7 +267,7 @@ const AdminDashboard = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+              className="w-full bg-blue-500 text-black p-2 rounded hover:bg-blue-600"
             >
               Upload
             </button>
@@ -282,7 +290,7 @@ const AdminDashboard = () => {
                   <th className="px-6 py-3 border-b">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className='text-red'>
                 {files.map((file) => (
                   <tr key={file.id}>
                     <td className="px-6 py-4 border-b">{file.fileName}</td>
@@ -364,11 +372,11 @@ const AdminDashboard = () => {
                             Edit
                           </button>
                           <button
-                            onClick={() => handleDelete(file.id)}
-                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                          >
-                            Delete
-                          </button>
+        onClick={() => handleDelete(file.id, file.className, file.subject, file.category)} // Pass className, subject, and category here
+        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+      >
+        Delete
+      </button>
                         </>
                       )}
                     </td>

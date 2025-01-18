@@ -1,182 +1,125 @@
 import React from "react";
 import logo from "./nav-logo.png";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   return (
     <>
-<nav className="navbar navbar-expand-lg">
-      <div className="container-fluid">
-        <Link className="navbar-brand" to="/">
-          <img src={logo} alt="Logo" className="navbar-logo" /> Unite Classes
-        </Link>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto"> {/* ms-auto for right alignment */}
-            <li className="nav-item">
-              <Link className="nav-link" aria-current="page" to="/">
-                Home
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/About">
-                About
-              </Link>
-            </li>
-          </ul>
+      <nav className="navbar navbar-expand-lg">
+        <div className="container-fluid">
+          <Link className="navbar-brand" to="/">
+            <img src={logo} alt="Logo" className="navbar-logo" /> Unite Classes
+          </Link>
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarNav">
+            <ul className="navbar-nav ms-auto">
+              <li className="nav-item">
+                <Link className="nav-link" aria-current="page" to="/">
+                  Home
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/About">
+                  About
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
-    </nav>
-      {
-        <style>{`
+      </nav>
+      <style>{`
         /* General Navbar Styles */
-.navbar {
-  background-color: #333333;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 10px 20px; /* Add padding for better spacing */
-}
+        .navbar {
+          background-color: #333333;
+          padding: 8px 15px; /* Reduced padding for compact height */
+          box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
-.navbar-brand {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #FFAE13;
-  display: flex;
-  align-items: center;
-  padding: 0; /* Remove extra padding around brand */
-}
-.navbar-brand:focus, .navbar-brand:hover {
-   color: #FFAE13;
-}
-/* Navbar Logo Styling */
-.navbar-logo {
-  height: 70px; /* Set the height of the logo */
-  width: auto;  /* Maintain aspect ratio of the logo */
-  margin-right: 10px; /* Space between the logo and the navbar brand text */
-  transition: transform 0.3s ease; /* Smooth scaling effect when hovered */
-}
+        .navbar-brand {
+          font-size: 1.5rem; /* Adjusted font size for better proportions */
+          font-weight: 600;
+          background: linear-gradient(0deg, #ffffff, #FFAE13); /* Gradient colors */
+          -webkit-background-clip: text; /* Clip the background to text */
+          -webkit-text-fill-color: transparent; /* Make the rest of the text transparent */
+          display: flex;
+          align-items: center;
+        }
 
-.navbar-brand:hover .navbar-logo {
-  transform: scale(1.1); 
-  color: #FFAE13; /* Slightly enlarge the logo when hovering over the brand */
-}
+        .navbar-brand:hover {
+          color: #FFAE13;
+        }
 
-/* Navbar Links Styling */
-.nav-link {
-  color: gray;     
- font-size: 20px;
-  font-weight: 500; /* Lighten the weight of the font for readability */
-  transition: color 0.3s ease, background-color 0.3s ease;
-  padding: 8px 15px; /* Add padding for better clickability */
-}                        
+        /* Logo Styling */
+        .navbar-logo {
+          height: 50px; /* Reduced logo size for compact height */
+          width: auto;
+          margin-right: 8px;
+          transition: transform 0.3s ease;
+        }
 
-/* Navbar */
-.navbar {
-  background-color: #333333;  /* Dark background */
-  color: #FFAE13;             /* Front color for text */
-}
+        .navbar-brand:hover .navbar-logo {
+          transform: scale(1.1);
+        }
 
-.navbar a {
-  color: #FFAE13;             /* Text color for links */
-  text-decoration: none;
-  padding: 10px 15px;
-  font-weight: bold;
-  transition: color 0.3s ease;
-}
+        /* Navbar Links */
+        .nav-link {
+          color: gray;
+          font-size: 18px; /* Slightly smaller font for compact look */
+          font-weight: 500;
+          padding: 5px 10px; /* Reduced padding for compact height */
+          transition: color 0.3s ease;
+        }
 
-.navbar a:hover {
-  color: #FF5733;             /* Hover color */
-}
+        .nav-link:hover {
+          color: #FFAE13;
+        }
 
+        .nav-link.active {
+          color: #FFAE13;
+        }
+           .nav-link.focus {
+          color: #FFAE13;
+        }
 
-/* Active Link Styling */
-.nav-link.active {
-  color: #ffeb3b;
-}
+        /* Navbar Toggler Icon */
+        .navbar-toggler-icon {
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba(255, 255, 255, 1)' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+        }
 
-/* Button Styling */
-.btn-light {
-  background-color: #ffffff;
-  color: #28a745;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
+        /* Mobile View */
+        @media (max-width: 768px) {
+          .navbar {
+            padding: 6px 10px;
+          }
 
-.btn-light:hover {
-  background-color: #28a745;
-  color: #fff;
-}
+          .navbar-brand {
+            font-size: 1.3rem;
+          }
 
-.btn-danger {
-  background-color: #f44336;
-  color: #fff;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
+          .navbar-logo {
+            height: 40px; /* Further reduce logo size on smaller screens */
+          }
 
-.btn-danger:hover {
-  background-color: #d32f2f;
-  color: #fff;
-}
+          .nav-link {
+            font-size: 16px;
+            padding: 8px 5px;
+          }
 
-/* Navbar Toggler Icon */
-.navbar-toggler-icon {
-  background-color: #fff;
-}
-
-/* Mobile and Tablet View */
-@media (max-width: 768px) {
-  /* Collapse navbar items into a vertical stack on mobile */
-  .navbar-collapse {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-
-  /* Adjust navbar links to be center-aligned */
-  .nav-link {
-    font-size: 1.25rem;
-    text-align: center;
-    padding: 10px 0;
-    width: 100%;
-  }
-
-  .nav-link:hover {
-    background-color: rgba(0, 0, 0, 0.1); /* Hover effect */
-  }
-
-  /* Make navbar brand text a little smaller */
-  .navbar-brand {
-    font-size: 1.5rem; /* Adjust brand size for smaller screens */
-  }
-
-  /* Reduce logo size on mobile */
-  .navbar-logo {
-    height: 50px; /* Make the logo smaller on mobile */
-  }
-
-  /* Toggler button size */
-  .navbar-toggler {
-    border: none; /* Remove default border */
-  }
-}
-
-/* Tablet View (For better readability) */
-@media (max-width: 1024px) {
-  .navbar-nav .nav-link {
-    font-size: 1.15rem; /* Slightly reduce font size on tablets */
-  }
-}
-
+          .navbar-toggler {
+            border: none;
+          }
+        }
       `}</style>
-      }
     </>
   );
 };

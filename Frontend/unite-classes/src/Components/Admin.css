@@ -54,6 +54,7 @@ form {
 input[type="text"], input[type="password"], input[type="file"] {
   width: 100%;
   padding: 10px;
+  color:black;
   border: 1px solid #ccc;
   border-radius: 5px;
   transition: border-color 0.3s ease;
@@ -61,6 +62,7 @@ input[type="text"], input[type="password"], input[type="file"] {
 
 input[type="text"]:focus, input[type="password"]:focus, input[type="file"]:focus {
   border-color: #0077cc;
+  
 }
 
 button {
@@ -97,8 +99,11 @@ table th, table td {
   padding: 10px 15px;
   border: 1px solid #e0e0e0;
   text-align: left;
+  color:#FFAE13;
 }
-
+.text-red{
+  color:red;
+}
 table th {
   background: #0077cc;
   color: white;

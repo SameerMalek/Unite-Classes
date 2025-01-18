@@ -449,127 +449,97 @@ app.put("/api/admin/files/:fileId", authenticateAdmin, async (req, res) => {
   }
 });
 
+
+
 // Delete Function
 app.delete("/api/admin/files/:fileId", authenticateAdmin, async (req, res) => {
   const { fileId } = req.params;
   const { className, subject, category } = req.query;
 
-  // Validate required parameters
-  if (!className || !subject || !category) {
-    return res.status(400).json({ 
-      message: "Missing required query parameters",
-      required: {
-        className: "Required - one of: " + (await Class.distinct('className')).join(', '),
-        subject: "Required - subject name",
-        category: "Required - category type"
-      },
-      received: {
-        className,
-        subject,
-        category
-      },
-      example: `http://localhost:5000/api/admin/files/${fileId}?className=Class 10&subject=YourSubject&category=YourCategory`
-    });
-  }
-
-  // Log the incoming parameters
-  console.log('Delete file request:', {
-    fileId,
-    className,
-    subject,
-    category
-  });
+  console.log("Delete Request Parameters:", { fileId, className, subject, category });
 
   try {
-    // Find the class containing the file
-    const classDoc = await Class.findOne({ className });
-    console.log('Class search result:', classDoc ? 'Found' : 'Not found');
-    
+    // Find the class
+    const classDoc = await Class.findOne({ className: className.trim() });
     if (!classDoc) {
-      const availableClasses = await Class.distinct('className');
-      return res.status(404).json({ 
+      return res.status(404).json({
         message: "Class not found",
-        searchedFor: { className },
-        availableClasses
+        searchedFor: className
       });
     }
 
-    // Find the subject
-    const subjectDoc = classDoc.subjects.find(s => s.name === subject);
-    console.log('Subject search result:', subjectDoc ? 'Found' : 'Not found');
-    
-    if (!subjectDoc) {
-      return res.status(404).json({ 
+    // Find the subject within the class
+    const subjectIndex = classDoc.subjects.findIndex(s => s.name === subject.trim());
+    if (subjectIndex === -1) {
+      return res.status(404).json({
         message: "Subject not found",
-        searchedFor: { className, subject },
-        availableSubjects: classDoc.subjects.map(s => s.name)
+        searchedFor: subject
       });
     }
 
-    // Find the category
-    const categoryDoc = subjectDoc.categories.find(c => c.type === category);
-    console.log('Category search result:', categoryDoc ? 'Found' : 'Not found');
-    
-    if (!categoryDoc) {
-      return res.status(404).json({ 
-        message: "Category not found",
-        searchedFor: { className, subject, category },
-        availableCategories: subjectDoc.categories.map(c => c.type)
-      });
-    }
-
-    // Find the file
-    const fileDoc = categoryDoc.files.id(fileId);
-    console.log('File search result:', fileDoc ? 'Found' : 'Not found');
-    
-    if (!fileDoc) {
-      return res.status(404).json({ 
-        message: "File not found",
-        searchedFor: { className, subject, category, fileId },
-        availableFileIds: categoryDoc.files.map(f => f._id)
-      });
-    }
-
-    // Get the file path for deletion from filesystem
-    const filePath = path.join(
-      __dirname,
-      "uploads",
-      path.basename(fileDoc.fileUrl)
+    // Find the category within the subject
+    const categoryIndex = classDoc.subjects[subjectIndex].categories.findIndex(
+      c => c.type === category.trim()
     );
+    if (categoryIndex === -1) {
+      return res.status(404).json({
+        message: "Category not found",
+        searchedFor: category
+      });
+    }
 
-    // Remove the file from the category
-    fileDoc.remove();
+    // Find the file within the category
+    const fileIndex = classDoc.subjects[subjectIndex].categories[categoryIndex].files.findIndex(
+      f => f._id.toString() === fileId
+    );
+    if (fileIndex === -1) {
+      return res.status(404).json({
+        message: "File not found",
+        searchedFor: fileId
+      });
+    }
+
+    // Get file information before deletion
+    const fileToDelete = classDoc.subjects[subjectIndex].categories[categoryIndex].files[fileIndex];
+
+    // Remove the file from the array
+    classDoc.subjects[subjectIndex].categories[categoryIndex].files.splice(fileIndex, 1);
+
+    // Save the updated document
     await classDoc.save();
 
-    // Delete the physical file if it exists
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      console.log('Physical file deleted:', filePath);
-    } else {
-      console.log('Physical file not found:', filePath);
+    // Delete the physical file
+    try {
+      const filePath = path.join(__dirname, "uploads", path.basename(fileToDelete.fileUrl));
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        console.log("Physical file deleted:", filePath);
+      }
+    } catch (fileError) {
+      console.log("Error deleting physical file:", fileError);
+      // Continue even if physical file deletion fails
     }
 
-    res.json({ 
+    res.json({
       message: "File deleted successfully",
       deletedFile: {
         id: fileId,
         className,
         subject,
         category,
-        fileName: fileDoc.fileName
+        fileName: fileToDelete.fileName
       }
     });
+
   } catch (error) {
-    console.error("Error deleting file:", error);
-    res.status(500).json({ 
-      message: "Error deleting file", 
+    console.error("Detailed error:", error);
+    res.status(500).json({
+      message: "Error deleting file",
       error: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
-});
-
-// Static File Serving
+});// Static File Serving
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Start Server
