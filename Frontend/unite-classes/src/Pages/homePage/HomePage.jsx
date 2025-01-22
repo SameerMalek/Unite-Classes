@@ -10,7 +10,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/classes');
+        const response = await fetch('https://unite-classes.onrender.com/api/classes');
         if (!response.ok) {
           throw new Error(`Failed to load classes: ${response.statusText}`);
         }

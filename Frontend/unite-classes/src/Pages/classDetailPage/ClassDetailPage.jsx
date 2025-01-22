@@ -11,7 +11,7 @@ const ClassDetailPage = () => {
   useEffect(() => {
     const fetchClassDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/classes/${classId}`);
+        const response = await fetch(`https://unite-classes.onrender.com/api/classes/${classId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch class data");
         }

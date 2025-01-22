@@ -29,7 +29,7 @@ const AdminDashboard = () => {
 
   const fetchFiles = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/files', {
+      const response = await fetch('https://unite-classes.onrender.com/api/admin/files', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/admin/login', {
+      const response = await fetch('https://unite-classes.onrender.com/api/admin/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -85,7 +85,7 @@ const AdminDashboard = () => {
     formData.append("category", uploadData.category);
   
     try {
-      const response = await fetch("http://localhost:5000/api/admin/upload", {
+      const response = await fetch("https://unite-classes.onrender.com/api/admin/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -124,7 +124,7 @@ const AdminDashboard = () => {
 
   const handleUpdate = async (fileId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/files/${fileId}`, {
+      const response = await fetch(`https://unite-classes.onrender.com/api/admin/files/${fileId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ const AdminDashboard = () => {
   
     try {
       const response = await fetch(
-        `http://localhost:5000/api/admin/files/${fileId}?className=${encodeURIComponent(className)}&subject=${encodeURIComponent(subject)}&category=${encodeURIComponent(category)}`,
+        `https://unite-classes.onrender.com/api/admin/files/${fileId}?className=${encodeURIComponent(className)}&subject=${encodeURIComponent(subject)}&category=${encodeURIComponent(category)}`,
         {
           method: "DELETE",
           headers: {

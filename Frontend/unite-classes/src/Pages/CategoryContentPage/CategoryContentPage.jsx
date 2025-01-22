@@ -16,7 +16,7 @@ const CategoryContentPage = () => {
         return;
       }
 
-      const apiUrl = `http://localhost:5000/api/classes/${classId}/subjects/${subjectName}/categories/${categoryType}/files`;
+      const apiUrl = `https://unite-classes.onrender.com/api/classes/${classId}/subjects/${subjectName}/categories/${categoryType}/files`;
       console.log("Requesting URL:", apiUrl);
 
       try {
