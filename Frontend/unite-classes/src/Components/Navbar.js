@@ -48,10 +48,7 @@ const Navbar = () => {
         .navbar-brand {
           font-size: 1.5rem; /* Adjusted font size for better proportions */
           font-weight: 600;
-          background: linear-gradient(0deg, #ffffff, #FFAE13); /* Gradient colors */
-          -webkit-background-clip: text; /* Clip the background to text */
-          -webkit-text-fill-color: transparent; /* Make the rest of the text transparent */
-          display: flex;
+       color : #FFAE13;
           align-items: center;
         }
 
