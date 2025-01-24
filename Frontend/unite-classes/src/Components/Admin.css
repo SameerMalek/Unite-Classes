@@ -54,7 +54,7 @@ form {
 input[type="text"], input[type="password"], input[type="file"] {
   width: 100%;
   padding: 10px;
-  color:black;
+  color: black;
   border: 1px solid #ccc;
   border-radius: 5px;
   transition: border-color 0.3s ease;
@@ -62,7 +62,14 @@ input[type="text"], input[type="password"], input[type="file"] {
 
 input[type="text"]:focus, input[type="password"]:focus, input[type="file"]:focus {
   border-color: #0077cc;
-  
+}
+
+/* Accessibility - Focus Visible Styles */
+input[type="text"]:focus-visible,
+input[type="password"]:focus-visible,
+input[type="file"]:focus-visible {
+  outline: 3px solid #0077cc;
+  outline-offset: 2px;
 }
 
 button {
@@ -78,6 +85,13 @@ button {
 button:hover {
   background-color: #005fa3;
   transform: scale(1.03);
+}
+
+/* Button Disabled State */
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Login Card */
@@ -100,11 +114,13 @@ table th, table td {
   border: 1px solid #e0e0e0;
   text-align: left;
   font-weight: bold;
-  color:black;
+  color: black;
 }
-.text-red{
-  color:red;
+
+.text-red {
+  color: red;
 }
+
 table th {
   background: #0077cc;
   color: white;
@@ -113,6 +129,11 @@ table th {
 
 table tr:nth-child(even) {
   background: #f3f4f6;
+}
+
+/* Table Rows Hover Effect */
+table tr:hover {
+  background-color: #e6f7ff;
 }
 
 /* Alerts */
@@ -159,5 +180,18 @@ table tr:nth-child(even) {
 
   table th, table td {
     padding: 8px;
+  }
+}
+
+@media (min-width: 769px) {
+  .min-h-screen {
+    flex-direction: row;
+    padding: 30px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .max-w-6xl {
+    max-width: 1300px;
   }
 }
