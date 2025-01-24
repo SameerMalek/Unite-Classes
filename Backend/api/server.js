@@ -361,9 +361,9 @@ app.post(
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${
-      file.filename
-    }`;
+    const protocol = req.headers["x-forwarded-proto"] || req.protocol;
+    const fileUrl = `${protocol}://${req.get("host")}/uploads/${file.filename}`;
+
     try {
       const classData = await Class.findOne({ className });
       if (!classData) {
@@ -387,14 +387,20 @@ app.post(
       categoryData.files.push({ fileName: file.originalname, fileUrl });
       await classData.save();
 
-      res.status(201).json({ message: "File uploaded successfully", fileUrl });
+      res.status(201).json({
+        message: "File uploaded successfully",
+        fileUrl,
+        fileName: file.originalname,
+        className,
+        subject,
+        category,
+      });
     } catch (error) {
-      console.error("Error uploading file:", error);
-      res.status(500).json({ message: "Failed to upload file", error });
+      console.error("Error uploading file:", error.message);
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );
-
 // // Update File
 app.put("/api/admin/files/:fileId", authenticateAdmin, async (req, res) => {
   const { fileId } = req.params;
