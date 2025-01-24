@@ -1,38 +1,46 @@
 import React from "react";
-import './Carousel.css'; // Your custom styles, if any
+import "./Carousel.css";
 
 const Carousel = () => {
   return (
     <div>
-      <div id="carouselExampleAutoplaying" className="carousel slide" data-bs-ride="carousel">
+      <div
+        id="carouselExampleAutoplaying"
+        className="carousel slide"
+        data-bs-ride="carousel"
+      >
         <div className="carousel-inner">
           <div className="carousel-item active">
             <img
-              src="/carousel1.png" // Images must be in the public folder
+              src="/carousel1.png"
               className="d-block w-100"
               alt="Slide 1"
             />
+            <div className="carousel-caption">
+              <h3>Empowering Education</h3>
+              <p>Learn, Grow, and Succeed with Unite Classes</p>
+            </div>
           </div>
           <div className="carousel-item">
-            <img
-              src="/carousel2.png"
-              className="d-block w-100"
-              alt="Slide 2"
-            />
+            <img src="/carousel2.png" className="d-block w-100" alt="Slide 2" />
+            <div className="carousel-caption">
+              <h3>Interactive Learning</h3>
+              <p>Discover the joy of learning with engaging content</p>
+            </div>
           </div>
           <div className="carousel-item">
-            <img
-              src="/carousel3.png"
-              className="d-block w-100"
-              alt="Slide 3"
-            />
+            <img src="/carousel3.png" className="d-block w-100" alt="Slide 3" />
+            <div className="carousel-caption">
+              <h3>Achieve Excellence</h3>
+              <p>Build your future with the best resources</p>
+            </div>
           </div>
           <div className="carousel-item">
-            <img
-              src="/carousel4.png"
-              className="d-block w-100"
-              alt="Slide 4"
-            />
+            <img src="/carousel4.png" className="d-block w-100" alt="Slide 3" />
+            <div className="carousel-caption">
+              <h3>Achieve Excellence</h3>
+              <p>Build your future with the best resources</p>
+            </div>
           </div>
         </div>
         <button

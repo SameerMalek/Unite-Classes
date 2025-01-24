@@ -38,8 +38,22 @@ const CategoryDetailPage = () => {
     fetchCategories();
   }, [classId, subjectName]);
 
-  if (loading) return <div>Loading categories...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading categories...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p>Error: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -50,7 +64,7 @@ const CategoryDetailPage = () => {
         ) : (
           categories.map((category) => (
             <Link
-              className="card"
+              className="card card-image"
               key={category._id}
               to={`/classes/${classId}/subjects/${subjectName}/categories/${category.type}`}
               style={{

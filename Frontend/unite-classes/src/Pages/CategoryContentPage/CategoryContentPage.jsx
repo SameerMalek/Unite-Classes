@@ -26,16 +26,12 @@ const CategoryContentPage = () => {
         }
 
         const data = await response.json();
-        console.log("Received data:", data); // Debug log
-        
         if (data.files && Array.isArray(data.files)) {
           setFiles(data.files);
         } else {
-          console.error("Invalid data format received:", data);
-          setError("Invalid data format received from server");
+          setError("Invalid data format received from server.");
         }
       } catch (err) {
-        console.error("Error fetching files:", err.message);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -57,7 +53,8 @@ const CategoryContentPage = () => {
   if (loading) {
     return (
       <div className="loading-container">
-        <div className="loading-spinner">Loading files...</div>
+        <div className="loading-spinner"></div>
+        <p>Loading files...</p>
       </div>
     );
   }
@@ -65,14 +62,14 @@ const CategoryContentPage = () => {
   if (error) {
     return (
       <div className="error-container">
-        <div className="error-message">Error: {error}</div>
+        <p>Error: {error}</p>
       </div>
     );
   }
 
   return (
     <div className="category-content-page">
-      <h1>
+      <h1 className="page-title">
         Files in {categoryType} - {subjectName}
       </h1>
       {files.length === 0 ? (
@@ -95,9 +92,7 @@ const CategoryContentPage = () => {
                 <tr key={file.fileName || index}>
                   <td>{index + 1}</td>
                   <td>{file.fileName}</td>
-                  <td>
-                    {new Date(file.uploadedAt).toLocaleDateString()}
-                  </td>
+                  <td>{new Date(file.uploadedAt).toLocaleDateString()}</td>
                   <td className="actions-cell">
                     <button
                       className="view-button"

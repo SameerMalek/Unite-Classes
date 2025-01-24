@@ -1,14 +1,60 @@
-/* Additional Custom Styles for HomePage */
+// Pages.css
+
 body {
-  margin: 0; /* Remove default browser margins */
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
 }
-h1{
-  font-weight: bold;
+.container{
+  padding: 0;
 }
-.container {
-max-width:100%;
-padding: 0px;
+.header {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding: 1.5rem 0;
 }
+@media (min-width: 768px) {
+  .container, .container-md, .container-sm {
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+  }
+}
+@media (min-width: 576px) {
+  .container, .container-sm {
+      max-width: 100%;
+      padding: 0;
+  }
+}
+.header h1 {
+  font-size: 2.5rem;
+  color: #FF5722;
+  margin: 0;
+}
+
+.main-content {
+  margin: 0 auto;
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.welcome-section h2 {
+  font-size: 2rem;
+  color: #1976D2;
+  margin-bottom: 1rem;
+  padding-top: 47px;
+}
+
+.welcome-section p {
+  font-size: 1.2rem;
+  color: #555;
+}
+
 .card-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* Fixed 3 columns for large screens */
@@ -21,258 +67,102 @@ padding: 0px;
 
 .card {
   position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  height: 350px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  text-align: center;
+  background-color: #fff;
+}
 
-  border-radius: 10px;
-  color: #fff;
-  text-decoration: none;
+.card-image {
+  flex: 1;
+  object-fit : cover;
   background-size: cover;
   background-position: center;
-  transition: transform 0.2s ease-in-out;
-  width: 100%; /* Take full width of grid cell */
-  height: 300px;
-  overflow: hidden;
 }
 
 .card:hover {
   transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
-.card h2 {
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  font-weight: bold;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 10px 20px;
-  border-radius: 5px;
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
+.card-content {
+  padding: 1rem;
+  text-align: center;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-content h3 {
   margin: 0;
-  white-space: normal;
-  overflow-wrap: break-word;
-} 
-
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  z-index: -1;
-  opacity: 0.5;
+  font-size: 1.5rem;
+  color: #333;
 }
 
-/* Medium screens */
-@media (max-width: 1024px) {
-  .card-container {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    padding: 16px;
-  }
+.card-content p {
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+  color: #555;
 }
 
-/* Small screens */
-@media (max-width: 640px) {
-  .card-container {
-    grid-template-columns: 1fr;
-  }
-
-  .card {
-    height: 300px;
-  }
-
-  .card h2 {
-    font-size: 1rem;
-    padding: 8px 16px;
-  }
-}
-
-/* Very small screens */
-@media (max-width: 320px) {
-  .card {
-    height: 250px;
-  }
-}
-
-
-/* loading-container */
 .loading-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  width: 100vw;
 }
 
 .loading-spinner {
   width: 50px;
   height: 50px;
-  border: 5px solid #f3f3f3;
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  border-top: 5px solid #FF5722;
   border-radius: 50%;
-  border-top-color: #3498db;
   animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* error-container */
 .error-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  width: 100vw;
-}
-
-.error-message {
-  font-size: 18px;
   color: red;
-}
-
-/* General Styles */
-.category-content-page {
-  background-color: #333333; /* Dark background */
-  color: white;
-  min-height: 100vh;
-  padding: 2rem 1.5rem;
-}
-
-.category-content-page h1 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #FFAE13; /* Amber color for headings */
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-@media (max-width: 768px) {
-  .category-content-page h1 {
-    font-size: 2rem; /* Smaller font size for smaller screens */
-  }
-}
-
-/* No Files Message */
-.no-files-message {
-  text-align: center;
-  font-size: 1.2rem;
-  color: #B0B0B0; /* Light gray */
-}
-
-/* Table Styling */
-.files-container {
-  margin-top: 2rem;
-  overflow-x: auto; /* Allow horizontal scrolling for small screens */
-}
-
-.file-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 1rem;
-  min-width: 600px; /* Ensures table is not too small on narrow screens */
-}
-
-.file-table th,
-.file-table td {
-  padding: 1rem;
-  border-bottom: 2px solid #4A4A4A; /* Light gray border for rows */
-  text-align: left;
-}
-
-.file-table th {
-  font-size: 1.1rem;
-  font-weight: 600;
-  background-color: #2D2D2D; /* Darker background for table headers */
-  color: #FFAE13; /* Amber color for headers */
-}
-
-.file-table tr {
-  background-color: #2E2E2E; /* Darker background for table rows */
-  color: #D0D0D0; /* Light gray text for rows */
-}
-
-.file-table tr:hover {
-  background-color: #3D3D3D; /* Slightly lighter on hover */
-}
-
-.file-table .actions-cell {
-  display: flex;
-  flex-wrap: wrap; /* Allows buttons to wrap on smaller screens */
-  gap: 1rem;
-}
-
-.file-table button {
-  padding: 0.5rem 1rem;
-  background-color: #FFAE13; /* Amber color for buttons */
-  color: #333333;
-  border-radius: 0.375rem; /* Rounded corners */
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  border: none;
-}
-
-.file-table button:hover {
-  background-color: #FF8C00; /* Darker amber on hover */
-}
-
-.file-table button:focus {
-  outline: none;
-}
-
-/* Loading and Error Messages */
-.loading-container,
-.error-container {
-  text-align: center;
-  padding: 2rem 0;
-}
-
-.loading-spinner,
-.error-message {
   font-size: 1.5rem;
-  color: #FFAE13; /* Amber for loading and error messages */
 }
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .file-table th,
-  .file-table td {
-    padding: 0.5rem; /* Reduce padding for smaller screens */
+/* Responsive Styles */
+@media (max-width: 992px) {
+  .card-image {
+    flex: 1;
+    object-fit : cover;
+    background-size: cover;
+    background-position: center;
   }
-
-  .file-table th {
-    font-size: 1rem; /* Smaller header text */
-  }
-
-  .file-table td {
-    font-size: 0.9rem; /* Smaller body text */
-  }
-
-  .file-table {
-    min-width: 100%; /* Table adapts to smaller screens */
+  .card-container {
+    grid-template-columns: repeat(2, 1fr); /* 2 cards per row for tablets */
   }
 }
 
-@media (max-width: 480px) {
-  .file-table th,
-  .file-table td {
-    font-size: 0.8rem; /* Further reduce text size for very small screens */
+@media (max-width: 800px) {
+  .card-image {
+    flex: 1;
+    object-fit : cover;
+    background-size: cover;
+    background-position: center;
   }
-
-  .file-table button {
-    padding: 0.4rem 0.8rem; /* Smaller buttons */
-    font-size: 0.85rem; /* Smaller button text */
+  .card-container {
+    grid-template-columns: repeat(1, 1fr); /* 1 card per row for mobile screens */
   }
-}
-.file-table tbody tr:nth-child(even) {
-  background-color: transparent; /* Remove the alternating background color */
-}
-.file-table thead th {
-  background-color: transparent; /* Example: Light gray background */
 }

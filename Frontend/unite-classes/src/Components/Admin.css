@@ -99,7 +99,8 @@ table th, table td {
   padding: 10px 15px;
   border: 1px solid #e0e0e0;
   text-align: left;
-  color:#FFAE13;
+  font-weight: bold;
+  color:black;
 }
 .text-red{
   color:red;
@@ -127,7 +128,7 @@ table tr:nth-child(even) {
 
 /* Footer */
 .footer {
-  background-color: #333333;
+  background-color: #ff6c00;
   color: white;
   text-align: center;
   padding: 20px 0;

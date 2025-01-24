@@ -7,6 +7,7 @@ const ClassDetailPage = () => {
   const [subjects, setSubjects] = useState([]);
   const [className, setClassName] = useState(""); // State to hold the class name
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
     const fetchClassDetails = async () => {
@@ -24,27 +25,45 @@ const ClassDetailPage = () => {
         }
       } catch (err) {
         setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchClassDetails();
   }, [classId]);
 
-  if (error) return <div>Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading Subjects...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
+    <div className="category-content-page">
       <h1>Subjects for {className}</h1>
       <div className="card-container">
         {subjects.map((subject) => (
           <Link
             key={subject.name}
             to={`/classes/${classId}/subjects/${subject.name}/categories`}
-            className="card"
+            className="card card-image"
             style={{
               backgroundImage: `url(${subject.backgroundImage || "https://via.placeholder.com/300"})`,
             }}
           >
+
           </Link>
         ))}
       </div>

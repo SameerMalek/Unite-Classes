@@ -19,7 +19,7 @@ const AdminDashboard = () => {
   // Predefined options for dropdowns
   const classOptions = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
   const subjectOptions = ['Science', 'Maths', 'English', 'Social Science'];
-  const categoryOptions = ['Notes', 'Tests', 'NCERT-Solution', 'Question-Papers','IMP Questions'];
+  const categoryOptions = ['Notes', 'Tests', 'NCERT-Solutions', 'Question-Papers','IMP Questions'];
 
   useEffect(() => {
     if (isLoggedIn) {

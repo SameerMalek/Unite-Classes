@@ -1,7 +1,9 @@
+// HomePage.js
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import "../homePage/Pages.css"
-import Carousel from '../Carousel'
+import Carousel from '../Carousel';
+import '../homePage/Pages.css';
+
 const HomePage = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,24 +29,45 @@ const HomePage = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading classes...</div>;
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading classes...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <div className="error-container">{error}</div>;
   }
 
   return (
-    <div>
-      <Carousel />
-      <strong><h1>Welcome to Unite Classes</h1></strong>
+    <div className="home-page">
+        <Carousel />
+      <header className="header">
+        <h1>Welcome to Unite Classes</h1>
+      </header>
+      <main className="main-content">
       
-      <div className="card-container">
-        {classes.map((cls) => (
-          <Link key={cls._id} to={`/class/${cls._id}`} className="card" style={{ backgroundImage: `url(${cls.backgroundImage})` }}> 
-          </Link>
-        ))}
-      </div>
+        <section className="welcome-section">
+          <h2>Your Path to Success Begins Here</h2>
+          <p>Explore our range of classes designed to help you excel academically and beyond.</p>
+        </section>
+        <section className="card-container">
+          {classes.map((cls) => (
+            <Link
+              key={cls._id}
+              to={`/class/${cls._id}`}
+              className="card"
+            >
+              <div
+                className="card-image"
+                style={{ backgroundImage: `url(${cls.backgroundImage})` }}
+              ></div>
+            </Link>
+          ))}
+        </section>
+      </main>
     </div>
   );
 };

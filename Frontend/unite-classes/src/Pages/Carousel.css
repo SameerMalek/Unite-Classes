@@ -1,28 +1,113 @@
+/* Carousel.css */
+
+/* General Carousel Styles */
 .carousel-inner img {
-    height: 550px;
-    object-fit: cover;
-    opacity:1;
-  }
-
-  .carousel-item img {
-    filter: brightness(90%);  /* This will reduce the brightness to 50% */
-    transition: filter 0.5s ease; /* Smooth transition for brightness change */
-  }
-  
-  .carousel-item img:hover {
-    filter: brightness(100%); /* Restore brightness on hover */
-  }
-  .carousel-control-prev:focus,
-.carousel-control-next:focus {
-  outline: none; /* Removes the focus outline */
-  box-shadow: none; /* Removes any additional browser-specific shadow */
-}
-.carousel-control-next, .carousel-control-prev {
-  outline: none;         /* Remove the outline around the button */
-  box-shadow: none;      /* Remove any shadow effect (including blue) */
+  height: 550px;
+  object-fit: cover;
+  filter: brightness(40%);
+  transition: filter 0.5s ease, opacity 0.5s ease; /* Removed transform transition */
 }
 
-.carousel-control-next:hover, .carousel-control-prev:hover {
-  background-color: transparent;  /* Remove background hover effect */
-  border: none;                    /* Remove any border on hover */
+.carousel-item {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+}
+
+.carousel-item.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+/* Captions */
+.carousel-caption {
+  position: absolute;
+  bottom: 20%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  text-shadow: 0px 5px 10px rgba(0, 0, 0, 0.8);
+  animation: slideIn 1.5s ease-out forwards;
+  padding: 25px;
+  border-radius: 10px;
+}
+
+.carousel-caption h3 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.carousel-caption p {
+  font-size: 1.3rem;
+  font-weight: 400;
+  margin-top: 10px;
+}
+
+/* Navigation Buttons */
+.carousel-control-next,
+.carousel-control-prev {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 60px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-control-next:hover,
+.carousel-control-prev:hover {
+  background-color: #FFAE13;
+  border-color: #FFAE13;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-size: 70%;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .carousel-inner img {
+    height: 350px;
+  }
+
+  .carousel-caption {
+    padding: 20px;
+  }
+
+  .carousel-caption h3 {
+    font-size: 1.8rem;
+  }
+
+  .carousel-caption p {
+    font-size: 1.1rem;
+  }
+
+  .carousel-control-next,
+  .carousel-control-prev {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Text Animation */
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
