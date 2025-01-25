@@ -18,8 +18,7 @@ const __dirname = dirname(__filename);
 
 // Ensure MONGODB_URI is defined
 // Ensure MONGODB_URI is defined
-if (!process.env.MONGODB_URI || !process.env.APPWRITE_ENDPOINT || !process.env.APPWRITE_PROJECT_ID || !process.env.APPWRITE_API_KEY) {
-  console.error("Environment variables are not properly defined.");
+if (!process.env.MONGODB_URI) {
   process.exit(1);
 }
 
