@@ -9,8 +9,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
-require('dotenv').config();
-
+// Load environment variables
+dotenv.config();
 
 // Fix for ES Modules to get the directory name
 const __filename = fileURLToPath(import.meta.url);
