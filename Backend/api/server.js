@@ -17,8 +17,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Ensure MONGODB_URI is defined
-if (!process.env.MONGODB_URI) {
-  console.error("MONGODB_URI is not defined in the environment variables.");
+// Ensure MONGODB_URI is defined
+if (!process.env.MONGODB_URI || !process.env.APPWRITE_ENDPOINT || !process.env.APPWRITE_PROJECT_ID || !process.env.APPWRITE_API_KEY) {
+  console.error("Environment variables are not properly defined.");
   process.exit(1);
 }
 
@@ -284,7 +285,59 @@ app.post("/api/admin/login", async (req, res) => {
     return res.status(401).json({ message: "Invalid credentials" });
   }
 });
+// File Upload Endpoint
+app.post("/api/admin/upload", authenticateAdmin, upload.single('file'), async (req, res) => {
+  try {
+    const { className, subject, category } = req.body;
+    const file = req.file;
 
+    if (!file || !className || !subject || !category) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Find or create the class
+    let classData = await Class.findOne({ className });
+    if (!classData) {
+      classData = new Class({ className, subjects: [] });
+    }
+
+    // Find or create the subject
+    let subjectData = classData.subjects.find(s => s.name === subject);
+    if (!subjectData) {
+      subjectData = { name: subject, categories: [] };
+      classData.subjects.push(subjectData);
+    }
+
+    // Find or create the category
+    let categoryData = subjectData.categories.find(c => c.type === category);
+    if (!categoryData) {
+      categoryData = { type: category, files: [] };
+      subjectData.categories.push(categoryData);
+    }
+
+    // Create file metadata
+    const fileMetadata = {
+      fileName: file.filename,
+      fileUrl: `/uploads/${file.filename}`, // Adjust based on your file serving strategy
+      className,
+      subject,
+      category
+    };
+
+    categoryData.files.push(fileMetadata);
+
+    await classData.save();
+
+    res.status(201).json({ 
+      message: "File uploaded successfully", 
+      fileUrl: fileMetadata.fileUrl 
+    });
+
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ message: "Upload failed", error: error.message });
+  }
+});
 // Fetch Files
 app.get("/api/admin/files", authenticateAdmin, async (req, res) => {
   try {
@@ -345,205 +398,47 @@ app.get("/api/admin/files", authenticateAdmin, async (req, res) => {
   }
 });
 
-// Upload File
-app.post(
-  "/api/admin/upload",
-  authenticateAdmin,
-  upload.single("file"),
-  async (req, res) => {
-    const { className, subject, category } = req.body;
-    const file = req.file;
-
-    if (!file || !className || !subject || !category) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
-    const protocol = req.headers["x-forwarded-proto"] || req.protocol;
-    const fileUrl = `${protocol}://${req.get("host")}/uploads/${file.filename}`;
-
-    try {
-      const classData = await Class.findOne({ className });
-      if (!classData) {
-        return res.status(404).json({ message: "Class not found" });
-      }
-
-      const subjectData = classData.subjects.find(
-        (subj) => subj.name === subject
-      );
-      if (!subjectData) {
-        return res.status(404).json({ message: "Subject not found" });
-      }
-
-      const categoryData = subjectData.categories.find(
-        (cat) => cat.type === category
-      );
-      if (!categoryData) {
-        return res.status(404).json({ message: "Category not found" });
-      }
-
-      categoryData.files.push({ fileName: file.originalname, fileUrl });
-      await classData.save();
-
-      res.status(201).json({
-        message: "File uploaded successfully",
-        fileUrl,
-        fileName: file.originalname,
-        className,
-        subject,
-        category,
-      });
-    } catch (error) {
-      console.error("Error uploading file:", error.message);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  }
-);
-// // Update File
-app.put("/api/admin/files/:fileId", authenticateAdmin, async (req, res) => {
-  const { fileId } = req.params;
-  const { className, subject, category, fileName } = req.body;
-
-  try {
-    // Find the class containing the file
-    const classDoc = await Class.findOne({ className });
-    if (!classDoc) {
-      return res.status(404).json({ message: "Class not found" });
-    }
-
-    // Find the subject
-    const subjectDoc = classDoc.subjects.find(s => s.name === subject);
-    if (!subjectDoc) {
-      return res.status(404).json({ message: "Subject not found" });
-    }
-
-    // Find the category
-    const categoryDoc = subjectDoc.categories.find(c => c.type === category);
-    if (!categoryDoc) {
-      return res.status(404).json({ message: "Category not found" });
-    }
-
-    // Find and update the file
-    const fileDoc = categoryDoc.files.id(fileId);
-    if (!fileDoc) {
-      return res.status(404).json({ message: "File not found" });
-    }
-
-    // Update file properties
-    if (fileName) fileDoc.fileName = fileName;
-    
-    // Save the updated document
-    await classDoc.save();
-
-    res.json({ 
-      message: "File updated successfully", 
-      file: {
-        id: fileDoc._id,
-        fileName: fileDoc.fileName,
-        fileUrl: fileDoc.fileUrl,
-        className,
-        subject,
-        category,
-        uploadedAt: fileDoc.uploadedAt
-      }
-    });
-  } catch (error) {
-    console.error("Error updating file:", error);
-    res.status(500).json({ message: "Error updating file", error: error.message });
-  }
-});
-
-
-
-// Delete Function
+// Delete File from Appwrite
 app.delete("/api/admin/files/:fileId", authenticateAdmin, async (req, res) => {
   const { fileId } = req.params;
   const { className, subject, category } = req.query;
 
-  console.log("Delete Request Parameters:", { fileId, className, subject, category });
-
   try {
-    // Find the class
-    const classDoc = await Class.findOne({ className: className.trim() });
-    if (!classDoc) {
-      return res.status(404).json({
-        message: "Class not found",
-        searchedFor: className
-      });
+    const classData = await Class.findOne({ className });
+    if (!classData) {
+      return res.status(404).json({ message: "Class not found" });
     }
 
-    // Find the subject within the class
-    const subjectIndex = classDoc.subjects.findIndex(s => s.name === subject.trim());
-    if (subjectIndex === -1) {
-      return res.status(404).json({
-        message: "Subject not found",
-        searchedFor: subject
-      });
+    const subjectData = classData.subjects.find((subj) => subj.name === subject);
+    if (!subjectData) {
+      return res.status(404).json({ message: "Subject not found" });
     }
 
-    // Find the category within the subject
-    const categoryIndex = classDoc.subjects[subjectIndex].categories.findIndex(
-      c => c.type === category.trim()
-    );
-    if (categoryIndex === -1) {
-      return res.status(404).json({
-        message: "Category not found",
-        searchedFor: category
-      });
+    const categoryData = subjectData.categories.find((cat) => cat.type === category);
+    if (!categoryData) {
+      return res.status(404).json({ message: "Category not found" });
     }
 
-    // Find the file within the category
-    const fileIndex = classDoc.subjects[subjectIndex].categories[categoryIndex].files.findIndex(
-      f => f._id.toString() === fileId
-    );
+    const fileIndex = categoryData.files.findIndex((file) => file._id.toString() === fileId);
     if (fileIndex === -1) {
-      return res.status(404).json({
-        message: "File not found",
-        searchedFor: fileId
-      });
+      return res.status(404).json({ message: "File not found" });
     }
 
-    // Get file information before deletion
-    const fileToDelete = classDoc.subjects[subjectIndex].categories[categoryIndex].files[fileIndex];
+    const fileToDelete = categoryData.files[fileIndex];
 
-    // Remove the file from the array
-    classDoc.subjects[subjectIndex].categories[categoryIndex].files.splice(fileIndex, 1);
+    // Delete from Appwrite
+    await storage.deleteFile(process.env.APPWRITE_BUCKET_ID, fileToDelete.appwriteFileId);
 
-    // Save the updated document
-    await classDoc.save();
+    // Remove metadata from MongoDB
+    categoryData.files.splice(fileIndex, 1);
+    await classData.save();
 
-    // Delete the physical file
-    try {
-      const filePath = path.join(__dirname, "uploads", path.basename(fileToDelete.fileUrl));
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        console.log("Physical file deleted:", filePath);
-      }
-    } catch (fileError) {
-      console.log("Error deleting physical file:", fileError);
-      // Continue even if physical file deletion fails
-    }
-
-    res.json({
-      message: "File deleted successfully",
-      deletedFile: {
-        id: fileId,
-        className,
-        subject,
-        category,
-        fileName: fileToDelete.fileName
-      }
-    });
-
+    res.json({ message: "File deleted successfully" });
   } catch (error) {
-    console.error("Detailed error:", error);
-    res.status(500).json({
-      message: "Error deleting file",
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    console.error("Error deleting file:", error.message);
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
-});// Static File Serving
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+});
 
 // Start Server
 const PORT = process.env.PORT || 5000;

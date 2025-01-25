@@ -1,6 +1,15 @@
+/* eslint-disable no-undef */
 import React, { useState, useEffect } from 'react';
-// import { Navigate } from 'react-router-dom';
 import "./Admin.css";
+import { Client, Storage, ID } from 'appwrite';
+
+// Initialize Appwrite client
+const client = new Client()
+  .setEndpoint('https://cloud.appwrite.io/v1') // Your Appwrite endpoint
+  .setProject('679491bd003711281808'); // Your Appwrite project ID
+
+// Initialize Appwrite Storage service
+const storage = new Storage(client);
 
 const AdminDashboard = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('adminToken'));
@@ -74,15 +83,15 @@ const AdminDashboard = () => {
     e.preventDefault();
   
     if (!uploadData.file || uploadData.file.size > 10 * 1024 * 1024) {
-      setError("File is required and must be smaller than 5MB");
+      setError("File is required and must be smaller than 10MB");
       return;
     }
   
     const formData = new FormData();
-    formData.append("file", uploadData.file);
-    formData.append("className", uploadData.className);
-    formData.append("subject", uploadData.subject);
-    formData.append("category", uploadData.category);
+    formData.append('file', uploadData.file);
+    formData.append('className', uploadData.className);
+    formData.append('subject', uploadData.subject);
+    formData.append('category', uploadData.category);
   
     try {
       const response = await fetch("https://unite-classes.onrender.com/api/admin/upload", {
@@ -93,10 +102,11 @@ const AdminDashboard = () => {
         body: formData,
       });
   
+      const data = await response.json();
+  
       if (response.ok) {
-        const data = await response.json();
         setSuccess(`File uploaded successfully! URL: ${data.fileUrl}`);
-        fetchFiles(); // Refresh file data
+        fetchFiles();
         setUploadData({
           file: null,
           className: "",
@@ -105,14 +115,14 @@ const AdminDashboard = () => {
         });
         document.querySelector('input[type="file"]').value = "";
       } else {
-        setError("Upload failed");
+        setError(data.message || "Upload failed");
       }
     } catch (error) {
+      console.error("File upload error:", error);
       setError("Upload failed. Please try again.");
     }
   };
-  
-
+ 
   const handleEdit = (file) => {
     setEditMode(file.id);
     setEditData({
@@ -383,7 +393,7 @@ const AdminDashboard = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table> 
           </div>
         </div>
       </div>
