@@ -87,25 +87,34 @@ const AdminDashboard = () => {
       return;
     }
   
-    const formData = new FormData();
-    formData.append('file', uploadData.file);
-    formData.append('className', uploadData.className);
-    formData.append('subject', uploadData.subject);
-    formData.append('category', uploadData.category);
-  
     try {
+      // Appwrite file upload
+      const uploadedFile = await storage.createFile(
+        '67949270002d1f2edc95', 
+        ID.unique(), 
+        uploadData.file
+      );
+  
+      // Create FormData
+      const formData = new FormData();
+      formData.append('file', uploadData.file);
+      formData.append('className', uploadData.className);
+      formData.append('subject', uploadData.subject);
+      formData.append('category', uploadData.category);
+  
       const response = await fetch("https://unite-classes.onrender.com/api/admin/upload", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          'Authorization': `Bearer ${localStorage.getItem("adminToken")}`,
+          // Remove Content-Type header to let browser set with boundary
         },
-        body: formData,
+        body: formData
       });
   
-      const data = await response.json();
+      const responseData = await response.json();
   
       if (response.ok) {
-        setSuccess(`File uploaded successfully! URL: ${data.fileUrl}`);
+        setSuccess(`File uploaded successfully! URL: ${responseData.fileUrl}`);
         fetchFiles();
         setUploadData({
           file: null,
@@ -113,16 +122,15 @@ const AdminDashboard = () => {
           subject: "",
           category: "",
         });
-        document.querySelector('input[type="file"]').value = "";
       } else {
-        setError(data.message || "Upload failed");
+        console.error("Upload failed:", responseData);
+        setError(`Upload failed: ${responseData.message || "Unknown error"}`);
       }
     } catch (error) {
       console.error("File upload error:", error);
       setError("Upload failed. Please try again.");
     }
   };
- 
   const handleEdit = (file) => {
     setEditMode(file.id);
     setEditData({
